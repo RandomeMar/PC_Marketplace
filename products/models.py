@@ -61,16 +61,35 @@ class Product(models.Model):
     
     @staticmethod
     def get_val_from_path(json_dict: dict, path: str):
-            """
-            Goes through paths defined in the base_mapping to see if an attribute was specified
-            """
-            result = json_dict
-            keys = path.split('.')
-            for key in keys:
-                if not isinstance(result, dict):
-                    return None
-                result = result.get(key)
-            return result
+        """
+        Goes through paths defined in the base_mapping to see if an attribute was specified
+        """
+        result = json_dict
+        keys = path.split('.')
+        for key in keys:
+            if not isinstance(result, dict):
+                return None
+            result = result.get(key)
+        return result
+    
+    @classmethod
+    def dict_to_model(cls, json_dict: dict):
+        """
+        Converts dictionary into a model instance
+        """
+        
+        init_data = {}
+        
+        for field, path in cls.base_mapping.items():
+            init_data[field] = cls.get_val_from_path(json_dict, path)
+        
+        product_name = init_data.pop("product_name")
+        
+        instance, was_created = cls.objects.update_or_create(defaults=init_data, product_name=product_name)
+        
+        print(f"Was created = {was_created}")
+        
+        return instance
     
         
         
@@ -122,7 +141,6 @@ class CPU(Product):
     mem_channels = OptionalPosIntField()
     
     
-    
     base_mapping = Product.base_mapping.copy()
     base_mapping |= {
         "microarchitecture": "microarchitecture",
@@ -172,18 +190,3 @@ class CPU(Product):
         "mem_channels": "specifications.memory.channels"
     }
     
-    @classmethod
-    def dict_to_model(cls, json_dict: dict):
-        """
-        Converts dictionary into a model instance
-        """
-        
-        init_data = {}
-        
-        for field, path in cls.base_mapping.items():
-            init_data[field] = cls.get_val_from_path(json_dict, path)
-        
-        instance = cls(**init_data)
-        instance.save()
-        return instance
-            

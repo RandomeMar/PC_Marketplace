@@ -2,6 +2,9 @@
 venv/
 .venv/
 
+# Ignore buildcores open db
+buildcores-open-db/
+
 # Ignore python cache files
 __pycache__/
 
