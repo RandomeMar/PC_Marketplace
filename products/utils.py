@@ -2,7 +2,7 @@ from django.apps import apps
 from git import Repo
 import os
 import json
-import models
+from . import models
 
 def import_from_opendb(product_model_name: str):
     """
@@ -27,7 +27,7 @@ def import_from_opendb(product_model_name: str):
     
     for item in os.listdir(directory):
         item_path = os.path.join(directory, item)
-        with open(item_path, 'r') as f:
+        with open(item_path, 'r', encoding="utf-8") as f:
             item_data = json.load(f)
         item_instance = product_class.dict_to_model(item_data)
         print(item_instance.product_name)
