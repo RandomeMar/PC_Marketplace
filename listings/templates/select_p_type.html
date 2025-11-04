@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}PC Marketplace{% endblock %}
+
+{% block content %}
+    <h1>Select a Product Type</h1>
+    <form id="select_form">
+        <select id="p_type_select" name="p_type">
+            <option value="CPU">CPU</option>
+        </select>
+        <button type="submit">Select</button>
+    </form>
+    <script>
+        // This loads the next url provided
+        document.getElementById("select_form").onsubmit = function(e) {
+            e.preventDefault();
+            const p_type = document.getElementById("p_type_select").value;
+
+            window.location.href = `/listings/${p_type}/{{next_url}}`;
+        }
+    </script>
+{% endblock %}

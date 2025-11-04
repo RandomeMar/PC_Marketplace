@@ -11,7 +11,7 @@
     </form>
     <ul>
     {% for product in products %}
-        <li>{{ product.product_name }}</li>
+        <li><a href="{% url 'listings:create_listing' p_type=p_type p_id=product.id %}">{{ product.product_name }}</a></li>
     {% endfor %}
     </ul>
 {% endblock %}
