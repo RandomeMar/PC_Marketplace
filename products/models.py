@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from rapidfuzz import process, fuzz
 
 
 # Optional field types so you don't have to keep writing null=True, blank=True
@@ -21,6 +22,34 @@ class OptionalBoolField(models.BooleanField):
         kwargs.setdefault('blank', True)
         super().__init__(*args, **kwargs)
 
+
+class ProductQuerySet(models.QuerySet):
+    def fuzzy_search(self, query: str, score_cutoff=0):
+        
+        qs = self.values_list("id", "product_name")
+        p_ids, p_choices = zip(*[(id, name.lower().strip()) for id, name in qs])
+        
+        # This returns 30 best matches based on the provided query.
+        # TODO: I want to replace this eventually with a version of token_set_ratio that does not care about excessive tokens. Basically count instead of ratio
+        matches = process.extract(query, p_choices, scorer=lambda q, c, score_cutoff=score_cutoff: max(
+                fuzz.token_set_ratio(q, c, score_cutoff=score_cutoff),
+                fuzz.partial_ratio(q, c, score_cutoff=score_cutoff)
+            ),
+            limit=30
+        )
+        
+        matched_ids = [p_ids[match[2]] for match in matches]
+        matched_products = list(self.filter(id__in=matched_ids))
+        matched_products.sort(key=lambda p: matched_ids.index(p.id)) # Sorts queryset by match score since querysets don't preserve order
+        return matched_products
+
+
+class ProductManager(models.Manager):
+    def get_queryset(self):
+        return ProductQuerySet(self.model, using=self._db)
+    
+    def fuzzy_search(self, query, score_cutoff=0):
+        return self.get_queryset().fuzzy_search(query, score_cutoff)
 
 
 
@@ -57,6 +86,8 @@ class Product(models.Model):
         "variant": "metadata.variant",
         "release_year": "metadata.releaseYear"
     }
+    
+    objects = ProductManager() # Uses custom manager so "Product.objects.filter().fuzzy_search()" is possible
     
     
     @staticmethod
