@@ -21,5 +21,5 @@ from django.shortcuts import render
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("products/", include("products.urls")),
+    path("listings/", include("listings.urls")),
 ]

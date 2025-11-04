@@ -4,7 +4,7 @@
 
 {% block content %}
     <h1>Enter a product</h1>
-    <form action="{% url 'search_products' p_type %}" method="get">
+    <form action="{% url 'listings:search_products' p_type=p_type %}" method="get">
         <!-- TODO: Need to add inputs for filters depending on the kind of product -->
         <input type="search" name="q" value="{{ query }}">
         <button type="submit">Search</button>
