@@ -5,18 +5,21 @@ from rapidfuzz import process, fuzz
 
 # Optional field types so you don't have to keep writing null=True, blank=True
 class OptionalCharField(models.CharField):
+    """Alternative to CharField(null=True, blank=True)."""
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('null', True)
         kwargs.setdefault('blank', True)
         super().__init__(*args, **kwargs)
 
 class OptionalPosIntField(models.PositiveIntegerField):
+    """Alternative to PositiveIntegerField(null=True, blank=True)."""
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('null', True)
         kwargs.setdefault('blank', True)
         super().__init__(*args, **kwargs)
 
 class OptionalBoolField(models.BooleanField):
+    """Alternative to BooleanField(null=True, blank=True)."""
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('null', True)
         kwargs.setdefault('blank', True)
@@ -24,6 +27,9 @@ class OptionalBoolField(models.BooleanField):
 
 
 class ProductQuerySet(models.QuerySet):
+    """
+    
+    """
     def fuzzy_search(self, query: str, score_cutoff=0):
         
         qs = self.values_list("id", "product_name")
@@ -45,6 +51,9 @@ class ProductQuerySet(models.QuerySet):
 
 
 class ProductManager(models.Manager):
+    """
+    
+    """
     def get_queryset(self):
         return ProductQuerySet(self.model, using=self._db)
     
@@ -55,6 +64,12 @@ class ProductManager(models.Manager):
 
 # Create your models here.
 class Product(models.Model):
+    """
+    A Django model representing a product.
+    
+    Attributes:
+
+    """
     # id [pk]
     
     # Metadata
@@ -125,6 +140,9 @@ class Product(models.Model):
         
         
 class CPU(Product):
+    """
+    A subclass of Product representing all CPU products.
+    """
     microarchitecture = OptionalCharField(max_length=100)
     core_family = OptionalCharField(max_length=100)
     socket = OptionalCharField(max_length=50)

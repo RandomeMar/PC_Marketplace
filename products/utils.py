@@ -4,9 +4,25 @@ import os
 import json
 from . import models
 
-def import_from_opendb(product_model_name: str):
+def import_from_opendb(product_model_name: str) -> None:
     """
-    Imports data base entries for the product type specified from the buildcores opendb.
+    Imports product records from Buildcores opendb to local database.
+    
+    Given the name of a Product subclass, this function ensures a local
+    opendb repository exists (cloning if not), then iterates over all
+    json files in the specified product directory. Each json file is
+    converted into an instance of the Product subclass.
+    
+    Args:
+        product_model_name (str): Name of a subclass of Product.
+    
+    Returns:
+        None
+    
+    Raises:
+        ValueError: If "product_model_name" is not a subclass of Product.
+        KeyError: If the model exists but there is no mapping in
+            "MODEL_TO_DIR_MAPPING".
     """
     MODEL_TO_DIR_MAPPING = {
         models.CPU: "CPU",
@@ -15,7 +31,8 @@ def import_from_opendb(product_model_name: str):
     BUILDCORES_REPO = "https://github.com/buildcores/buildcores-open-db"
     LOCAL_PATH = "./buildcores-open-db"
     
-    product_class = apps.get_model("products", product_model_name)
+    product_class: type[models.Product] = apps.get_model("products",
+        product_model_name)
     if product_class == None:
         raise ValueError(f"Model {product_model_name} not found in products.")
     
