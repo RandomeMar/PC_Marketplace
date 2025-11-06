@@ -4,6 +4,27 @@ from products.models import Product
 
 # Create your models here.
 class Listing(models.Model):
+    """
+    A Django model representing a product listing.
+    
+    This model stores the owner, product, title, listing text, condition,
+    price, stock, and upload timestamp.
+     
+    Attributes:
+        CONDITION_CHOICES (list[(str, str)]): Choices for the "condition"
+            field.
+        owner (type[AUTH_USER_MODEL]): Foreign key to the User model
+            representing the listing owner.
+        product (type[Product]): Foreign key to the Product subclass
+            representing the listed product.
+        title (type[CharField]): Title of the listing (max 100 chars).
+        listing_text (type[TextField]): Listing description.
+        condition (type[CharField]): Product condition. Must be one of
+            "CONDITION_CHOICES".
+        price (type[DecimalField]): Price per item in the listing.
+        stock (type[PositiveIntegerField]): Number of items available.
+        upload_time (type[DateTimeField]): Timestamp of listing creation.
+    """
     CONDITION_CHOICES = [
         ("new", "new"),
         ("refurb", "refurbished"),

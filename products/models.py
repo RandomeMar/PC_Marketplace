@@ -1,22 +1,26 @@
 from django.db import models
 from django.utils import timezone
 from rapidfuzz import process, fuzz
+from .models import Product
 
 
 # Optional field types so you don't have to keep writing null=True, blank=True
 class OptionalCharField(models.CharField):
+    """Alternative to CharField(null=True, blank=True)."""
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('null', True)
         kwargs.setdefault('blank', True)
         super().__init__(*args, **kwargs)
 
 class OptionalPosIntField(models.PositiveIntegerField):
+    """Alternative to PositiveIntegerField(null=True, blank=True)."""
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('null', True)
         kwargs.setdefault('blank', True)
         super().__init__(*args, **kwargs)
 
 class OptionalBoolField(models.BooleanField):
+    """Alternative to BooleanField(null=True, blank=True)."""
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('null', True)
         kwargs.setdefault('blank', True)
@@ -24,8 +28,25 @@ class OptionalBoolField(models.BooleanField):
 
 
 class ProductQuerySet(models.QuerySet):
+    """
+    Custom QuerySet for Product models with additional query utility.
+    
+    Methods:
+        fuzzzy_search(query, score_cutoff=0): 
+            Performs a fuzzy search on product names and returns
+            a ranked list of matching Product instances.
+    """
     def fuzzy_search(self, query: str, score_cutoff=0):
+        """
+        Performs a fuzzy search on product names.
         
+        Args:
+            query (str): Search string to match against product names.
+            score_cutoff (int): Minimum similarity score.
+        
+        Returns:
+            list[Product]: Ranked Products with similarity score above cutoff.
+        """
         qs = self.values_list("id", "product_name")
         p_ids, p_choices = zip(*[(id, name.lower().strip()) for id, name in qs])
         
@@ -45,6 +66,12 @@ class ProductQuerySet(models.QuerySet):
 
 
 class ProductManager(models.Manager):
+    """
+    Custom ModelManager for Product models.
+    
+    Returns a ProductQuerySet instance by default. This enables the use
+    of query methods like ".fuzzy_Search".
+    """
     def get_queryset(self):
         return ProductQuerySet(self.model, using=self._db)
     
@@ -55,6 +82,32 @@ class ProductManager(models.Manager):
 
 # Create your models here.
 class Product(models.Model):
+    """
+    A Django model representing a product.
+    
+    This model defines common product attributes. It uses a custom
+    model manager "ProductManager" that adds fuzzy search capabilities.
+    
+    Attributes:
+        product_name (CharField): Name of the product. Required.
+        manufacturer (OptionalCharField): Manufacturer's name.
+        part_numbers (JSONField): List of manufacturer's part
+            numbers/SKUs.
+        series (OptionalCharField): The name of the product series.
+        variant (OptionalCharField): The product variant.
+        release_year (OptionalPosIntField): Year the product released.
+        amazon_sku (OptionalCharField): Amazon product SKU.
+        newegg_sku (OptionalCharField): Newegg product SKU.
+        bestbuy_sku (OptionalCharField): BestBuy product SKU.
+        walmart_sku (OptionalCharField): Walmart product SKU.
+        adorama_sku (OptionalCharField): Adorama product SKU.
+        manufacturer_url (OptionalCharField): Manufacturer URL for the
+            product.
+        opendb_id (UUIDField): ID for product used by opendb. Required.
+        last_synced (DateTimeField): Timestamp of last opendb sync.
+        base_mapping (dict): Maps model fields to fields in opendb JSON
+            schema.
+    """
     # id [pk]
     
     # Metadata
@@ -93,7 +146,15 @@ class Product(models.Model):
     @staticmethod
     def get_val_from_path(json_dict: dict, path: str):
         """
-        Goes through paths defined in the base_mapping to see if an attribute was specified
+        Retrieves a nested value from a JSON-like dictionary using a dot-delimited path.
+        
+        Args:
+            json_dict (dict): JSON file as a nested dict.
+            path (str): Dot-delimited path. (e.g., "metadata.name").
+        
+        Returns:
+            Any | None: The value found at the path, or None if the path
+                does not exist in the dict.
         """
         result = json_dict
         keys = path.split('.')
@@ -104,9 +165,26 @@ class Product(models.Model):
         return result
     
     @classmethod
-    def dict_to_model(cls, json_dict: dict):
+    def dict_to_model(cls: type[Product], json_dict: dict):
         """
-        Converts dictionary into a model instance
+        Converts a JSON-like dict into an instance of a Product subclass.
+        
+        This method uses the class's "base_mapping" to map fields in the
+        JSON data to fields in the model. If a record with the same
+        product name already exists, it is updated.
+        
+        Args:
+            cls (type[Product]): Product model subclass.
+            json_dict (dict): JSON file as a nested dict.
+        
+        Returns:
+            Product: Instance created from given dict.
+        
+        Raises:
+            IntegrityError: If the dict does not provide "product_name"
+                or "opendb_id".
+            ValueError: If the dict does not provide the correct type
+                for an attribute.
         """
         
         init_data = {}
@@ -125,6 +203,50 @@ class Product(models.Model):
         
         
 class CPU(Product):
+    """
+    A subclass of Product representing CPU products specifically.
+    
+    Attributes:
+        microarchitecture (OptionalCharField): CPU microarchitecture.
+        core_family (OptionalCharField): CPU core family.
+        socket (OptionalCharField): Socket type.
+        cores_tot (OptionalPosIntField): Total number of physical cores.
+        cores_perf (OptionalPosIntField): Number of performance cores.
+        cores_eff (OptionalPosIntField): Number of efficiency cores.
+        threads (OptionalPosIntField): Max number of logical threads.
+        clocks_perf_base (OptionalPosIntField): Base clock speed of
+            performance cores (GHz).
+        clocks_perf_boost (OptionalPosIntField): Boost clock speed of
+            performance cores (GHz).
+        clocks_eff_base (OptionalPosIntField): Base clock speed of
+            efficency cores (GHz).
+        clocks_eff_boost (OptionalPosIntField): Boost clock speed of
+            efficency cores (GHz).
+        cache_l1 (OptionalCharField): Description of L1 cache configuration.
+        cache_l2 (OptionalPosIntField): Amount of L2 cache (MB).
+        cache_l3 (OptionalPosIntField): Amount of L3 cache (MB).
+        tdp (OptionalPosIntField): CPU thermal design power (watts).
+        intgraph_model (OptionalCharField): Integrated graphics model.
+        intgraph_base_clock (OptionalPosIntField): Base clock speed of 
+            integrated graphics.
+        intgraph_boost_clock (OptionalPosIntField): Boost clock speed of 
+            integrated graphics.
+        intgraph_shader_count (OptionalPosIntField): Number of shaders
+            in the integrated graphics.
+        ecc_support (OptionalBoolField): Whether Error-Correcting Code
+            memory is supported.
+        includes_cooler (OptionalBoolField): If cooler is included.
+        packaging (OptionalCharField): Packaging type.
+        lithography (OptionalCharField): The manufacturing process
+            technology used to make the CPU.
+        simul_multithread (OptionalBoolField): If simultaneous
+            multithreading is supported.
+        mem_max_support (OptionalPosIntField): Max supported memory (GB).
+        mem_types (JSONField): List of supported memory types.
+        mem_channels (OptionalPosIntField): Max supported memory channels.
+        base_mapping (dict): Maps model fields to fields in opendb JSON
+            schema.
+    """
     microarchitecture = OptionalCharField(max_length=100)
     core_family = OptionalCharField(max_length=100)
     socket = OptionalCharField(max_length=50)
