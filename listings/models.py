@@ -17,13 +17,15 @@ class Listing(models.Model):
             representing the listing owner.
         product (type[Product]): Foreign key to the Product subclass
             representing the listed product.
-        title (type[CharField]): Title of the listing (max 100 chars).
-        listing_text (type[TextField]): Listing description.
-        condition (type[CharField]): Product condition. Must be one of
+        product_type (CharField): Name of the model "product" is. This
+            attribute is automatically filled.
+        title (CharField): Title of the listing (max 100 chars).
+        listing_text (TextField): Listing description.
+        condition (CharField): Product condition. Must be one of
             "CONDITION_CHOICES".
-        price (type[DecimalField]): Price per item in the listing.
-        stock (type[PositiveIntegerField]): Number of items available.
-        upload_time (type[DateTimeField]): Timestamp of listing creation.
+        price (DecimalField): Price per item in the listing.
+        stock (PositiveIntegerField): Number of items available.
+        upload_time (DateTimeField): Timestamp of listing creation.
     """
     CONDITION_CHOICES = [
         ("new", "new"),
@@ -34,9 +36,15 @@ class Listing(models.Model):
     
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
+    product_type = models.CharField(max_length=50, editable=False)
     title = models.CharField(max_length=100)
     listing_text = models.TextField()
     condition = models.CharField(max_length=10, choices=CONDITION_CHOICES)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.PositiveIntegerField(default=0)
     upload_time = models.DateTimeField(auto_now_add=True)
+    
+    def save(self, *args, **kwargs):
+        if self.product:
+            self.product_type = self.product.__class__.__name__
+        return super().save(*args, **kwargs)

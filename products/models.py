@@ -1,7 +1,8 @@
 from django.db import models
 from django.utils import timezone
 from rapidfuzz import process, fuzz
-from .models import Product
+from polymorphic.models import PolymorphicModel
+from polymorphic.managers import PolymorphicQuerySet, PolymorphicManager
 
 
 # Optional field types so you don't have to keep writing null=True, blank=True
@@ -27,9 +28,9 @@ class OptionalBoolField(models.BooleanField):
         super().__init__(*args, **kwargs)
 
 
-class ProductQuerySet(models.QuerySet):
+class ProductQuerySet(PolymorphicQuerySet):
     """
-    Custom QuerySet for Product models with additional query utility.
+    Custom PolymorphicQuerySet for Product models with additional query utility.
     
     Methods:
         fuzzzy_search(query, score_cutoff=0): 
@@ -65,9 +66,9 @@ class ProductQuerySet(models.QuerySet):
         return matched_products
 
 
-class ProductManager(models.Manager):
+class ProductManager(PolymorphicManager):
     """
-    Custom ModelManager for Product models.
+    Custom PolymorphicManager for Product models.
     
     Returns a ProductQuerySet instance by default. This enables the use
     of query methods like ".fuzzy_Search".
@@ -81,7 +82,7 @@ class ProductManager(models.Manager):
 
 
 # Create your models here.
-class Product(models.Model):
+class Product(PolymorphicModel):
     """
     A Django model representing a product.
     
@@ -165,7 +166,7 @@ class Product(models.Model):
         return result
     
     @classmethod
-    def dict_to_model(cls: type[Product], json_dict: dict):
+    def dict_to_model(cls, json_dict: dict):
         """
         Converts a JSON-like dict into an instance of a Product subclass.
         

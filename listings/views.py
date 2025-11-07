@@ -35,7 +35,7 @@ def select_p_type(request: HttpRequest, next_url="search/"):
 
 def search_listings(request: HttpRequest, p_type: str):
     """
-    Searches for listings.
+    Handles searching for listings.
     
     NOT IMPLEMENTED. Need to add "listing_search.html" template.
     
@@ -53,6 +53,18 @@ def search_listings(request: HttpRequest, p_type: str):
         ValueError: If "p_type" does not match any subclass of Product.
     """
     # TODO: Implement this view
+    product_model: type[Product] = load_product_model(p_type)
+    
+    query = request.GET.get("q")
+    if query:
+        query = unquote(query)
+    
+    
+    listings_of_P = Listing.objects.filter(product_type=p_type)
+    
+    for listing in listings_of_P:
+        print(listing.title)
+    
     return HttpResponse("SEARCH LISTINGS")
 
 
