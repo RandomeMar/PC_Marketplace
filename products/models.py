@@ -20,6 +20,15 @@ class OptionalPosIntField(models.PositiveIntegerField):
         kwargs.setdefault('blank', True)
         super().__init__(*args, **kwargs)
 
+class OptionalDecField(models.DecimalField):
+    """Alternative to DecimalField(null=True, blank=True)."""
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('null', True)
+        kwargs.setdefault('blank', True)
+        kwargs.setdefault('max_digits', 5)
+        kwargs.setdefault('decimal_places', 2)
+        super().__init__(*args, **kwargs)
+
 class OptionalBoolField(models.BooleanField):
     """Alternative to BooleanField(null=True, blank=True)."""
     def __init__(self, *args, **kwargs):
@@ -265,24 +274,24 @@ class CPU(Product):
     
     # Clocks
     # Performance
-    clocks_perf_base = OptionalPosIntField(verbose_name="Performance Core Clock")
-    clocks_perf_boost = OptionalPosIntField(verbose_name="Performance Core Boost Clock")
+    clocks_perf_base = OptionalDecField(verbose_name="Performance Core Clock")
+    clocks_perf_boost = OptionalDecField(verbose_name="Performance Core Boost Clock")
     # Efficiency
-    clocks_eff_base = OptionalPosIntField()
-    clocks_eff_boost = OptionalPosIntField()
+    clocks_eff_base = OptionalDecField()
+    clocks_eff_boost = OptionalDecField()
     
     # Cache
     cache_l1 = OptionalCharField(max_length=100, verbose_name="L1 Cache") # This explains the l1 cache structure
-    cache_l2 = OptionalPosIntField(verbose_name="L2 Cache")
-    cache_l3 = OptionalPosIntField(verbose_name="L3 Cache")
+    cache_l2 = OptionalDecField(verbose_name="L2 Cache")
+    cache_l3 = OptionalDecField(verbose_name="L3 Cache")
     
     tdp = OptionalPosIntField(verbose_name="TDP")
     
     # Integrated Graphics
     intgraph_model = OptionalCharField(max_length=100, verbose_name="Integrated Graphics") # The model of integrated graphics
-    intgraph_base_clock = OptionalPosIntField()
-    intgraph_boost_clock = OptionalPosIntField()
-    intgraph_shader_count = OptionalPosIntField()
+    intgraph_base_clock = OptionalDecField()
+    intgraph_boost_clock = OptionalDecField()
+    intgraph_shader_count = OptionalDecField()
     
     ecc_support = OptionalBoolField(verbose_name="ECC Support") # Whether the CPU supports Error-Correcting Code memory
     
@@ -295,7 +304,7 @@ class CPU(Product):
     simul_multithread = OptionalBoolField(verbose_name="Simultaneous Multithreading")
     
     # Memory
-    mem_max_support = OptionalPosIntField() # In GB
+    mem_max_support = OptionalDecField() # In GB
     mem_types = models.JSONField(default=list)
     mem_channels = OptionalPosIntField()
     
