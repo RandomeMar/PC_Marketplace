@@ -37,7 +37,7 @@ class ProductQuerySet(PolymorphicQuerySet):
             Performs a fuzzy search on product names and returns
             a ranked list of matching Product instances.
     """
-    def fuzzy_search(self, query: str, score_cutoff=0):
+    def fuzzy_search(self, query: str, score_cutoff=60):
         """
         Performs a fuzzy search on product names.
         
@@ -49,7 +49,10 @@ class ProductQuerySet(PolymorphicQuerySet):
             list[Product]: Ranked Products with similarity score above cutoff.
         """
         qs = self.values_list("id", "product_name")
-        p_ids, p_choices = zip(*[(id, name.lower().strip()) for id, name in qs])
+        if qs:
+            p_ids, p_choices = zip(*[(id, name.lower().strip()) for id, name in qs])
+        else:
+            p_ids, p_choices = ([], [])
         
         # This returns 30 best matches based on the provided query.
         # TODO: I want to replace this eventually with a version of token_set_ratio that does not care about excessive tokens. Basically count instead of ratio
@@ -112,12 +115,12 @@ class Product(PolymorphicModel):
     # id [pk]
     
     # Metadata
-    product_name = models.CharField(max_length=300) # REQUIRED
-    manufacturer = OptionalCharField(max_length=150)
-    part_numbers = models.JSONField(default=list) # Array of manufacturer's part numbers/SKUs
-    series = OptionalCharField(max_length=150)
-    variant = OptionalCharField(max_length=150)
-    release_year = OptionalPosIntField()
+    product_name = models.CharField(max_length=300, verbose_name="Product Name") # REQUIRED
+    manufacturer = OptionalCharField(max_length=150, verbose_name="Manufacturer")
+    part_numbers = models.JSONField(default=list, verbose_name="Part Numbers") # Array of manufacturer's part numbers/SKUs
+    series = OptionalCharField(max_length=150, verbose_name="Series")
+    variant = OptionalCharField(max_length=150, verbose_name="Variant")
+    release_year = OptionalPosIntField(verbose_name="Release Year") # TODO: Change to date
     
     # General Product Info
     amazon_sku = OptionalCharField(max_length=100)
@@ -130,6 +133,8 @@ class Product(PolymorphicModel):
     
     opendb_id = models.UUIDField(unique=True) # REQUIRED
     last_synced = models.DateTimeField(default=timezone.now)
+    
+    FILTER_FIELDS = ["manufacturer", "series", "release_year"]
     
     base_mapping = {
         "opendb_id": "opendb_id",
@@ -248,52 +253,57 @@ class CPU(Product):
         base_mapping (dict): Maps model fields to fields in opendb JSON
             schema.
     """
-    microarchitecture = OptionalCharField(max_length=100)
-    core_family = OptionalCharField(max_length=100)
-    socket = OptionalCharField(max_length=50)
+    microarchitecture = OptionalCharField(max_length=100, verbose_name="Microarchitecture")
+    core_family = OptionalCharField(max_length=100, verbose_name="Core Family")
+    socket = OptionalCharField(max_length=50, verbose_name="Socket")
     
     # Cores
-    cores_tot = OptionalPosIntField()
-    cores_perf = OptionalPosIntField()
-    cores_eff = OptionalPosIntField()
-    threads = OptionalPosIntField()
+    cores_tot = OptionalPosIntField(verbose_name="Total Core Count")
+    cores_perf = OptionalPosIntField(verbose_name="Performance Core Count")
+    cores_eff = OptionalPosIntField(verbose_name="Efficiency Core Count")
+    threads = OptionalPosIntField(verbose_name="Thread Count")
     
     # Clocks
     # Performance
-    clocks_perf_base = OptionalPosIntField()
-    clocks_perf_boost = OptionalPosIntField()
+    clocks_perf_base = OptionalPosIntField(verbose_name="Performance Core Clock")
+    clocks_perf_boost = OptionalPosIntField(verbose_name="Performance Core Boost Clock")
     # Efficiency
     clocks_eff_base = OptionalPosIntField()
     clocks_eff_boost = OptionalPosIntField()
     
     # Cache
-    cache_l1 = OptionalCharField(max_length=100) # This explains the l1 cache structure
-    cache_l2 = OptionalPosIntField()
-    cache_l3 = OptionalPosIntField()
+    cache_l1 = OptionalCharField(max_length=100, verbose_name="L1 Cache") # This explains the l1 cache structure
+    cache_l2 = OptionalPosIntField(verbose_name="L2 Cache")
+    cache_l3 = OptionalPosIntField(verbose_name="L3 Cache")
     
-    tdp = OptionalPosIntField()
+    tdp = OptionalPosIntField(verbose_name="TDP")
     
     # Integrated Graphics
-    intgraph_model = OptionalCharField(max_length=100) # The model of integrated graphics
+    intgraph_model = OptionalCharField(max_length=100, verbose_name="Integrated Graphics") # The model of integrated graphics
     intgraph_base_clock = OptionalPosIntField()
     intgraph_boost_clock = OptionalPosIntField()
     intgraph_shader_count = OptionalPosIntField()
     
-    ecc_support = OptionalBoolField() # Whether the CPU supports Error-Correcting Code memory
+    ecc_support = OptionalBoolField(verbose_name="ECC Support") # Whether the CPU supports Error-Correcting Code memory
     
-    includes_cooler = OptionalBoolField()
+    includes_cooler = OptionalBoolField(verbose_name="Includes Cooler")
     
-    packaging = OptionalCharField(max_length=100) # Describes type of packaging
+    packaging = OptionalCharField(max_length=100, verbose_name="Packaging") # Describes type of packaging
     
-    lithography = OptionalCharField(max_length=50) # The manufacturing process technology used. Can be multiple process technologies if chiplet design
+    lithography = OptionalCharField(max_length=50, verbose_name="Lithography") # The manufacturing process technology used. Can be multiple process technologies if chiplet design
     
-    simul_multithread = OptionalBoolField()
+    simul_multithread = OptionalBoolField(verbose_name="Simultaneous Multithreading")
     
     # Memory
     mem_max_support = OptionalPosIntField() # In GB
     mem_types = models.JSONField(default=list)
     mem_channels = OptionalPosIntField()
     
+    FILTER_FIELDS = Product.FILTER_FIELDS + [
+        "microarchitecture", "core_family", "socket", "cores_tot",
+        "threads", "clocks_perf_base", "clocks_perf_boost", "tdp",
+        "intgraph_model", "ecc_support", "includes_cooler", "simul_multithread"
+        ]
     
     base_mapping = Product.base_mapping.copy()
     base_mapping |= {

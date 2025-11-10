@@ -3,6 +3,7 @@ from django.http import HttpRequest, HttpResponse
 from django.apps import apps
 from django.urls import reverse
 from django.contrib.auth import get_user_model
+from django.db.models import Min, Max
 from products.models import Product, ProductQuerySet
 from .models import Listing
 from .forms import ListingForm
@@ -59,8 +60,10 @@ def search_listings(request: HttpRequest, p_type: str):
     if query:
         query = unquote(query)
     
+    p_filters = {} # Product filters (series, manufacturer, release_year, etc.)
+    l_filters = {} # Listing filters (upload_time, price, stock, etc.)
     
-    listings_of_P = Listing.objects.filter(product_type=p_type)
+    listings_of_P = Listing.objects.filter(product_type=p_type).filter(p_filters).filter(l_filters)
     
     for listing in listings_of_P:
         print(listing.title)
@@ -93,10 +96,9 @@ def search_products(request: HttpRequest, p_type: str):
     """
     Handles searching for products when creating a listing.
     
-    This view expects a 'q' query parameter and other filters (to be
-    added later) in the URL. It loads the proper Product subclass,
-    performs a fuzzy search on the subclass, and renders the search
-    results.
+    This view expects a 'q' query parameter and other filters in the
+    URL. It loads the proper Product subclass, performs a fuzzy search 
+    on the subclass, and renders the search results.
     
     Args:
         request (HttpRequest): Incoming HTTP request. May include query
@@ -113,17 +115,91 @@ def search_products(request: HttpRequest, p_type: str):
     """
     product_model: type[Product] = load_product_model(p_type)
     
+    str_filters = {}
+    int_filters = {}
+    bool_filters = {}
+    
+    for field in product_model._meta.get_fields():
+        if not field.concrete or field.is_relation:
+            continue
+        if field.get_internal_type() == "PositiveIntegerField":
+            # Integer field
+            min_val = request.GET.get(f"{field.name}_min")
+            max_val = request.GET.get(f"{field.name}_max")
+            
+            if min_val is not None and min_val != "":
+                int_filters[f"{field.name}__gte"] = int(min_val)
+            if max_val is not None and max_val != "":
+                int_filters[f"{field.name}__lte"] = int(max_val)
+        elif field.get_internal_type() == "BooleanField":
+            # Boolean field
+            value = request.GET.get(field.name)
+            if value == "True":
+                bool_filters[field.name] = True
+            elif value == "False":
+                bool_filters[field.name] = False
+        else:
+            # String field
+            values = request.GET.getlist(field.name)
+            if values:
+                str_filters[f"{field.name}__in"] = values
+
+    
     query = request.GET.get("q")
     if query:
         query = unquote(query)
+    
+    matched_products: list[Product] = product_model.objects.filter(**str_filters, **int_filters).fuzzy_search(query)
+    
+    str_options = {}
+    int_options = {}
+    bool_options = {}
+    
+    # Gets all filter names along with their options
+    for field in product_model._meta.get_fields():
+        if not field.concrete or field.is_relation:
+            continue
+        if field.name not in getattr(product_model, "FILTER_FIELDS", []):
+            continue
         
-    p_filters = {} # TODO: Get filter values from template
-    matched_products: list[Product] = product_model.objects.filter(**p_filters).fuzzy_search(query)
+        if field.get_internal_type() == "PositiveIntegerField":
+            # Get int field options
+            min_max = product_model.objects.aggregate(
+                min_val=Min(field.name),
+                max_val=Max(field.name)
+                )
+            int_options[field.name] = {
+                "label": field.verbose_name,
+                "min_val": min_max["min_val"],
+                "max_val": min_max["max_val"],
+                "selected": [
+                    int_filters.get(f"{field.name}__gte"),
+                    int_filters.get(f"{field.name}__lte")
+                    ]
+            }
+        elif field.get_internal_type() == "BooleanField":
+            # Get bool field options
+            bool_options[field.name] = {
+                "label": field.verbose_name,
+                "selected": bool_filters.get(field.name)
+            }
+        else:
+            # Get string field options
+            options = product_model.objects.values_list(field.name, flat=True).distinct().order_by(field.name)
+            str_options[field.name] = {
+                "label": field.verbose_name, 
+                "options": options,
+                "selected": str_filters.get(f"{field.name}__in")
+                }
+    
     
     context = {
         "p_type": p_type,
         "products": matched_products,
-        "query": query
+        "query": query,
+        "str_options": str_options,
+        "int_options": int_options,
+        "bool_options": bool_options,
     }
     
     return render(request, "product_search.html", context)
