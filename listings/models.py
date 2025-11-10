@@ -34,15 +34,17 @@ class Listing(models.Model):
         ("for_parts", "for parts")
     ]
     
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Owner")
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     product_type = models.CharField(max_length=50, editable=False)
-    title = models.CharField(max_length=100)
-    listing_text = models.TextField()
-    condition = models.CharField(max_length=10, choices=CONDITION_CHOICES)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    stock = models.PositiveIntegerField(default=0)
-    upload_time = models.DateTimeField(auto_now_add=True)
+    title = models.CharField(max_length=100, verbose_name="Title")
+    listing_text = models.TextField(verbose_name="Listing Text")
+    condition = models.CharField(max_length=10, choices=CONDITION_CHOICES, verbose_name="Condition")
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Price")
+    stock = models.PositiveIntegerField(default=0, verbose_name="Stock")
+    upload_time = models.DateTimeField(auto_now_add=True, verbose_name="Upload Time")
+    
+    FILTER_FIELDS = ["condition", "price"]
     
     def save(self, *args, **kwargs):
         if self.product:

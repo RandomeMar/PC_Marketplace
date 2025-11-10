@@ -12,22 +12,39 @@
         <div id="filters">
             <h2>Filters</h2>
             
-            {% for f_name, filter in int_options.items %}
+            {% for f_name, filter in filter_fields.int.items %}
                 <details>
                     <summary>{{ filter.label }}</summary>
                     <label>
                         min
                         <input type="number" name="{{ f_name }}_min"
-                        value="{{ filter.selected.0 }}">
+                        value="{{ filter.user_min }}">
                     </label>
                     <label>
                         max
                         <input type="number" name="{{ f_name }}_max"
-                        value="{{ filter.selected.1 }}">
+                        value="{{ filter.user_max }}">
                     </label>
                 </details>
             {% endfor %}
-            {% for f_name, filter in str_options.items %}
+
+            {% for f_name, filter in filter_fields.float.items %}
+                <details>
+                    <summary>{{ filter.label }}</summary>
+                    <label>
+                        min
+                        <input type="number" name="{{ f_name }}_min"
+                        value="{{ filter.user_min }}" step=".01">
+                    </label>
+                    <label>
+                        max
+                        <input type="number" name="{{ f_name }}_max"
+                        value="{{ filter.user_max }}" step=".01">
+                    </label>
+                </details>
+            {% endfor %}
+
+            {% for f_name, filter in filter_fields.str.items %}
                 <details>
                     <summary>{{ filter.label }}</summary>
                     <ul>
@@ -35,25 +52,25 @@
                             <li>
                                 <input type="checkbox" name="{{ f_name }}"
                                 value="{{ option }}"
-                                {% if option in filter.selected %}checked{% endif %}>
+                                {% if option in filter.user_inputs %}checked{% endif %}>
                                 {{ option }}
                             </li>
                         {% endfor %}
                     </ul>
                 </details>
             {% endfor %}
-            {% for f_name, filter in bool_options.items %}
+            {% for f_name, filter in filter_fields.bool.items %}
                 <details>
                     <summary>{{ filter.label }}</summary>
                     <label>
                         Yes
                         <input type="radio" name="{{ f_name }}" value="True"
-                        {% if filter.selected is True %}checked{% endif %}>
+                        {% if filter.user_input is True %}checked{% endif %}>
                     </label>
                     <label>
                         No
                         <input type="radio" name="{{ f_name }}" value="False"
-                        {% if filter.selected is False %}checked{% endif %}>
+                        {% if filter.user_input is False %}checked{% endif %}>
                     </label>
                 </details>
             {% endfor %}
