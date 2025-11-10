@@ -18,10 +18,12 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from listings import views
 
 from django.shortcuts import render
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', views.homepage, name='home'),
     path("listings/", include("listings.urls")),
 ]

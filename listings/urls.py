@@ -5,6 +5,7 @@ app_name = "listings"
 
 urlpatterns = [
     path("test/", views.test, name="test"),
+
     
     path("", views.select_p_type, name="select_p_type"), # Select p_type
     path("<str:p_type>/search/", views.search_listings, name="search_listings"), # Searches for listings of p_type

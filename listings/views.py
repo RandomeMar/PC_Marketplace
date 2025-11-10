@@ -17,6 +17,10 @@ def test(request: HttpRequest):
     """
     return HttpResponse("TESTING")
 
+def homepage(request: HttpRequest):
+    print("test")
+    return render(request, "homepage.html") 
+
 
 def select_p_type(request: HttpRequest, next_url="search/"):
     """

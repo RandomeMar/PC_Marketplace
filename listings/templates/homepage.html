@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}PC Marketplace{% endblock %}
+
+{% block content %}
+<h1>PC_Marketplace Homepage</h1>
+<p>Mostly for testing and getting to different pages</p>
+
+<br><hr>
+<h2>What page would you like to go to:</h2>
+<ul>
+    <li><a href="{% url 'listings:select_p_type' %}">Select p type</a></li>
+</ul>
+
+
+
+{% endblock %}
