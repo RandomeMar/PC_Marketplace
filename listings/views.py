@@ -3,10 +3,12 @@ from django.http import HttpRequest, HttpResponse
 from django.apps import apps
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from django.db.models import Min, Max, Model
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.db.models import Min, Max, Model, Q
 from products.models import Product, ProductQuerySet
-from .models import Listing
-from .forms import ListingForm
+from .models import Listing, ListingImage
+from .forms import ListingForm, ListingImageFormSet
 from urllib.parse import unquote
 
 # Create your views here.
@@ -285,41 +287,39 @@ def search_products(request: HttpRequest, p_type: str):
     return render(request, "product_search.html", context)
 
 
-def create_listing(request: HttpRequest, p_type: str, p_id: int):
-    """
-    Handles creating listings based off a given product.
-    
-    This view processes a listing creation form submitted via a POST
-    request. If it receives a valid form, a new Listing record is added,
-    and it redirects to the new listing's page. If the form is invalid
-    or not provided, the form is re-rendered.
-    
-    Args:
-        request (HttpRequest): Incoming HTTP request. Contains form data.
-        p_type (str): The name of a model class in the "products" app 
-            that represents a subclass of Product.
-        p_id (int): The ID of the product the listing is based on.
+@login_required
+def create_listing(request: HttpRequest):
 
-    Returns:
-        HttpResponse: Renders the "listing_form.html" template if the
-            form is invalid or missing. Redirects to the
-            "load_listing_page" view if the form submission is valid.
-    """
-    # This is temp since we don't have our accounts system setup yet
-    User = get_user_model()
-    test_user, _ = User.objects.get_or_create(username="testuser")
-    
     if request.method == "POST":
         form = ListingForm(request.POST)
-        if form.is_valid():
+        image_formset = ListingImageFormSet(request.POST, request.FILES)
+        
+        if form.is_valid() and image_formset.is_valid():
             listing = form.save(commit=False)
-            listing.product_id = p_id
-            listing.owner = test_user # This is temp since we don't have our accounts system setup yet
+            listing.owner = request.user
+
             listing.save()
+            
+            # Save images
+            images = image_formset.save(commit=False)
+            for idx, image in enumerate(images):
+                if image.image:
+                    image.listing = listing
+                    image.order = idx
+                    image.save()
+            
+            messages.success(request, "Listing created successfully!")
             return redirect("listings:load_listing_page", l_id=listing.id)
+        else:
+            messages.error(request, "Please correct the errors in the form.")
     else:
         form = ListingForm()
-    return render(request, "listing_form.html", context={"form": form})
+        image_formset = ListingImageFormSet()
+    
+    return render(request, "create_listing.html", {
+        "form": form,
+        "image_formset": image_formset,
+    })
 
 
 def load_listing_page(request: HttpRequest, l_id: int):
@@ -338,4 +338,158 @@ def load_listing_page(request: HttpRequest, l_id: int):
         Http404: If there is no listing with the provided ID.
     """
     listing = get_object_or_404(Listing, id=l_id)
-    return render(request, "listing_page.html", context={"listing": listing})
+    
+    images = listing.images.all()
+    
+    is_owner = request.user.is_authenticated and listing.owner == request.user
+    
+    return render(request, "listing_detail.html", context={
+        "listing": listing,
+        "images": images,
+        "is_owner": is_owner,
+    })
+
+
+
+@login_required
+def edit_listing(request: HttpRequest, l_id: int):
+    """
+    Allows the owner to edit their listing.
+    
+    Args:
+        request (HttpRequest): Incoming HTTP request.
+        l_id (int): The ID of the listing to edit.
+    
+    Returns:
+        HttpResponse: Renders the listing edit form or redirects after saving.
+    
+    Raises:
+        Http404: If the listing doesn't exist or user doesn't own it.
+    """
+    listing = get_object_or_404(Listing, id=l_id, owner=request.user)
+    
+    if request.method == "POST":
+        form = ListingForm(request.POST, instance=listing)
+        image_formset = ListingImageFormSet(request.POST, request.FILES, instance=listing)
+        
+        if form.is_valid() and image_formset.is_valid():
+            form.save()
+            
+            # Save images
+            images = image_formset.save(commit=False)
+            for idx, image in enumerate(images):
+                if image.image:
+                    image.order = idx
+                    image.save()
+            
+            #deleted images
+            for image in image_formset.deleted_objects:
+                image.delete()
+            
+            messages.success(request, "Listing updated successfully!")
+            return redirect("listings:load_listing_page", l_id=listing.id)
+        else:
+            messages.error(request, "Please correct the errors in the form.")
+    else:
+        form = ListingForm(instance=listing)
+        image_formset = ListingImageFormSet(instance=listing)
+    
+    return render(request, "listing_form.html", context={
+        "form": form,
+        "image_formset": image_formset,
+        "listing": listing,
+        "is_edit": True,
+    })
+
+
+@login_required
+def delete_listing(request: HttpRequest, l_id: int):
+    """
+    Allows the owner to delete their listing.
+    
+    Args:
+        request (HttpRequest): Incoming HTTP request.
+        l_id (int): The ID of the listing to delete.
+    
+    Returns:
+        HttpResponse: Confirmation page or redirect after deletion.
+    
+    Raises:
+        Http404: If the listing doesn't exist or user doesn't own it.
+    """
+    listing = get_object_or_404(Listing, id=l_id, owner=request.user)
+    
+    if request.method == "POST":
+        listing.delete()
+        messages.success(request, "Listing deleted successfully!")
+        return redirect("listings:my_listings")
+    
+    return render(request, "delete_listing.html", context={"listing": listing})
+
+
+@login_required
+def my_listings(request: HttpRequest):
+    """
+    Shows all listings created by the current user.
+    
+    Args:
+        request (HttpRequest): Incoming HTTP request.
+    
+    Returns:
+        HttpResponse: Renders page showing user's listings.
+    """
+    listings = Listing.objects.filter(owner=request.user).order_by('-upload_time')
+    
+    return render(request, "my_listings.html", context={
+        "listings": listings,
+    })
+
+
+def listing_page(request: HttpRequest):
+    """
+    Shows all active listings (public marketplace view).
+    
+    Args:
+        request (HttpRequest): Incoming HTTP request.
+    
+    Returns:
+        HttpResponse: Renders page showing all active listings.
+    """
+    # Get filter parameters
+    query = request.GET.get('q', '')
+    condition = request.GET.get('condition', '')
+    min_price = request.GET.get('min_price', '')
+    max_price = request.GET.get('max_price', '')
+    
+    listings = Listing.objects.filter(status='active')
+    
+    # applies filters
+    if query:
+        listings = listings.filter(
+            Q(title__icontains=query) | 
+            Q(listing_text__icontains=query)
+        )
+    
+    if condition:
+        listings = listings.filter(condition=condition)
+    
+    if min_price:
+        try:
+            listings = listings.filter(price__gte=float(min_price))
+        except ValueError:
+            pass
+    
+    if max_price:
+        try:
+            listings = listings.filter(price__lte=float(max_price))
+        except ValueError:
+            pass
+    
+    return render(request, "listing_page.html", context={
+        "listings": listings,
+        "query": query,
+        "condition": condition,
+        "min_price": min_price,
+        "max_price": max_price,
+        "condition_choices": Listing.CONDITION_CHOICES,
+    })

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Login - PC Marketplace{% endblock %}
+
+{% block content %}
+<div style="max-width: 500px; margin: 50px auto; padding: 20px;">
+    <h1>Welcome Back</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div style="padding: 10px; margin: 10px 0; background: {% if message.tags == 'error' %}#f8d7da{% else %}#d4edda{% endif %}; border-radius: 5px;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" style="background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; width: 100%;">Log In</button>
+    </form>
+
+    <p style="text-align: center; margin-top: 20px;">
+        Don't have an account? <a href="{% url 'accounts:register' %}">Sign up here</a>
+    </p>
+</div>
+{% endblock %}

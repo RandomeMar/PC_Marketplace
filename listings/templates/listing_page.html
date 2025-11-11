@@ -1,9 +1,27 @@
 {% extends "base.html" %}
 
-{% block title %}PC Marketplace{% endblock %}
+{% block title %}Browse Listings{% endblock %}
 
 {% block content %}
-    {% comment %} TEMP {% endcomment %}
-    <h1>{{ listing.product.product_name }} | {{ listing.id }}</h1>
-    <h2>{{ listing.title }}</h2>
+<h1>Browse Listings</h1>
+
+<a href="{% url 'listings:create_listing' %}">+ Create Listing</a>
+
+<hr>
+
+{% if listings %}
+    {% for listing in listings %}
+        <div style="border: 1px solid black; padding: 10px; margin: 10px 0;">
+            <h3>{{ listing.title }}</h3>
+            <p>Price: ${{ listing.price }}</p>
+            <p>Condition: {{ listing.get_condition_display }}</p>
+            <p>Seller: {{ listing.owner.username }}</p>
+            <a href="{% url 'listings:load_listing_page' l_id=listing.id %}">View Details</a>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>No listings found.</p>
+    <a href="{% url 'listings:create_listing' %}">Create First Listing</a>
+{% endif %}
+
 {% endblock %}
