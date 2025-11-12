@@ -77,19 +77,18 @@ def search_listings(request: HttpRequest, p_type: str):
         **l_filter_vals["str"], **l_filter_vals["int"], **l_filter_vals["bool"],
         **p_filter_vals["str"], **p_filter_vals["int"], **p_filter_vals["bool"]) # TODO: NO FUZZY SEARCH YET
     
-    str_options, int_options, bool_options = build_filter_fields(Listing, l_filter_vals)
-    str_options, int_options, bool_options = build_filter_fields(product_model, p_filter_vals, "product__")
+    l_filter_fields = build_filter_fields(Listing, l_filter_vals)
+    p_filter_fields = build_filter_fields(product_model, p_filter_vals, "product__")
     
     context = {
         "p_type": p_type,
         "listings": matched_listings,
         "query": query,
-        "str_options": str_options,
-        "int_options": int_options,
-        "bool_options": bool_options,
+        "l_filter_fields": l_filter_fields,
+        "p_filter_fields": p_filter_fields,
     }
     
-    return render(request, "listing_search.html", context)
+    return render(request, "search_listings.html", context)
 
 
 def load_product_model(product_type_str: str):
@@ -300,7 +299,11 @@ def search_products(request: HttpRequest, p_type: str):
         query = unquote(query)
     
     matched_products: list[Product] = product_model.objects.filter(
-        **filter_vals["str"], **filter_vals["int"], **filter_vals["bool"], **filter_vals["float"]).fuzzy_search(query)
+        **filter_vals["str"],
+        **filter_vals["int"],
+        **filter_vals["bool"],
+        **filter_vals["float"]
+        ).fuzzy_search(query)
     
     filter_fields = build_filter_fields(product_model, filter_vals)
     

@@ -42,7 +42,7 @@
     <div class="main-navigation">
         <h2>Browse Marketplace</h2>
         <ul class="nav-links">
-            <li><a href="{% url 'listings:all_listings_page' %}">Browse Products</a></li>
+            <li><a href="{% url 'listings:select_p_type' %}">Select a product type to search</a></li>
             {% if user.is_authenticated %}
                 <li><a href="{% url 'listings:my_listings' %}">My Listings</a></li>
                 <li><a href="#">My Purchases</a></li>
