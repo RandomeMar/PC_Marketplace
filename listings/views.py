@@ -311,13 +311,31 @@ def search_products(request: HttpRequest, p_type: str):
 
 
 @login_required
-def create_listing(request: HttpRequest):
-
+def create_listing(request: HttpRequest, p_type: str, p_id: int):
+    """
+    Handles creating listings based off a given product.
+    
+    This view processes a listing creation form submitted via a POST
+    request. If it receives a valid form, a new Listing record is added,
+    and it redirects to the new listing's page. If the form is invalid
+    or not provided, the form is re-rendered.
+    
+    Args:
+        request (HttpRequest): Incoming HTTP request. Contains form data.
+        p_type (str): The name of a model class in the "products" app 
+            that represents a subclass of Product.
+        p_id (int): The ID of the product the listing is based on.
+    Returns:
+        HttpResponse: Renders the "listing_form.html" template if the
+            form is invalid or missing. Redirects to the
+            "load_listing_page" view if the form submission is valid.
+    """
     if request.method == "POST":
         form = ListingForm(request.POST)
         image_formset = ListingImageFormSet(request.POST, request.FILES)
         
         if form.is_valid() and image_formset.is_valid():
+            listing.product_id = p_id
             listing = form.save(commit=False)
             listing.owner = request.user
 
@@ -339,10 +357,12 @@ def create_listing(request: HttpRequest):
         form = ListingForm()
         image_formset = ListingImageFormSet()
     
-    return render(request, "create_listing.html", {
+    context = {
         "form": form,
         "image_formset": image_formset,
-    })
+    }
+    
+    return render(request, "create_listing.html", context=context)
 
 
 def load_listing_page(request: HttpRequest, l_id: int):
@@ -366,11 +386,13 @@ def load_listing_page(request: HttpRequest, l_id: int):
     
     is_owner = request.user.is_authenticated and listing.owner == request.user
     
-    return render(request, "listing_detail.html", context={
+    context = {
         "listing": listing,
         "images": images,
         "is_owner": is_owner,
-    })
+    }
+    
+    return render(request, "listing_detail.html", context=context)
 
 
 
@@ -468,7 +490,7 @@ def my_listings(request: HttpRequest):
     })
 
 
-def listing_page(request: HttpRequest):
+def all_listings_page(request: HttpRequest):
     """
     Shows all active listings (public marketplace view).
     

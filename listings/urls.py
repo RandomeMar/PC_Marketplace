@@ -18,7 +18,7 @@ urlpatterns = [
     
     
     # NEW:
-    path('', views.listing_page, name='listing_page'),  # Browse all listings
+    path('', views.all_listings_page, name='all_listings_page'),  # Browse all listings
     
     path('my-listings/', views.my_listings, name='my_listings'),  # View user's listings
     path('edit/<int:l_id>/', views.edit_listing, name='edit_listing'), # Edit a listing
