@@ -8,7 +8,6 @@ class ListingForm(forms.ModelForm):
     class Meta:
         model = Listing
         fields = [
-            "product_name",
             "title",
             "listing_text",
             "condition",

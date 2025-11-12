@@ -109,6 +109,19 @@ def load_product_model(product_type_str: str):
     return product_model
 
 def gather_filters(request: HttpRequest, model: type[Model], prefix="") -> dict:
+    """
+    Creates a filter values dict for a model from an http GET request.
+    
+    This dict can be directly used to filter a model through **dict notation.
+    
+    Args:
+        request: Contains filters values.
+        model: Model to get filters from.
+        prefix: Used when accessing filters from a foreign key.
+    
+    Returns:
+        dict: Filter values.
+    """
     str_filters = {}
     int_filters = {}
     float_filters = {}
@@ -153,8 +166,6 @@ def gather_filters(request: HttpRequest, model: type[Model], prefix="") -> dict:
                 float_filters[f"{prefix}{field.name}__lte"] = float(max_val)
             except ValueError:
                 pass
-            
-            
         
         elif field.get_internal_type() == "BooleanField":
             # Boolean field
@@ -174,6 +185,18 @@ def gather_filters(request: HttpRequest, model: type[Model], prefix="") -> dict:
     return {"str": str_filters, "int": int_filters, "float": float_filters, "bool": bool_filters}
 
 def build_filter_fields(model: type[Model], filter_vals: dict[dict], prefix="") -> dict[dict]:
+    """
+    Creates a dict storing filter fields for templates.
+    
+    Args:
+        model: Model fields are from.
+        filter_vals: Dict containing filter values. See gather_filters().
+        prefix: Used when accessing filters of a foreign key.
+    Returns:
+        dict: This nested dict contains filters of different data types.
+            The structure of each data type is different so read carefully
+            to know how to implement a template with it.
+    """
     str_options = {}
     int_options = {}
     float_options = {}
