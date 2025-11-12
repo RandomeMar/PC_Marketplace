@@ -11,7 +11,7 @@
                 <option value="{{ option.value }}">{{ option.name }}</option>
             {% endfor %}
         </select>
-        <button type="submit">Next</button>
+        <button type="submit">Select</button>
     </form>
     
     <script>
@@ -20,7 +20,7 @@
             const p_type = document.getElementById("p_type_select").value;
             
             // Goes to product search page based on the type chosen
-            window.location.href = `/listings/${p_type}/search-products/`;
+            window.location.href = `/listings/${p_type}/{{ next_url }}`;
         }
     </script>
 {% endblock %}

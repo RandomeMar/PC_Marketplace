@@ -312,7 +312,7 @@ def search_products(request: HttpRequest, p_type: str):
         "filter_fields": filter_fields,
     }
     
-    return render(request, "product_search.html", context)
+    return render(request, "search_products.html", context)
 
 
 @login_required
