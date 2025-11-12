@@ -20,13 +20,11 @@ class OptionalPosIntField(models.PositiveIntegerField):
         kwargs.setdefault('blank', True)
         super().__init__(*args, **kwargs)
 
-class OptionalDecField(models.DecimalField):
-    """Alternative to DecimalField(null=True, blank=True)."""
+class OptionalFloatField(models.FloatField):
+    """Alternative to DecimalField(blank=True)."""
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('null', True)
         kwargs.setdefault('blank', True)
-        kwargs.setdefault('max_digits', 5)
-        kwargs.setdefault('decimal_places', 2)
         super().__init__(*args, **kwargs)
 
 class OptionalBoolField(models.BooleanField):
@@ -179,6 +177,7 @@ class Product(PolymorphicModel):
             result = result.get(key)
         return result
     
+    
     @classmethod
     def dict_to_model(cls, json_dict: dict):
         """
@@ -205,9 +204,21 @@ class Product(PolymorphicModel):
         init_data = {}
         
         for field, path in cls.base_mapping.items():
-            init_data[field] = cls.get_val_from_path(json_dict, path)
-        
+            value = cls.get_val_from_path(json_dict, path)
+            
+            internal_type = cls._meta.get_field(field).get_internal_type()
+            
+            # if internal_type == "FloatField":
+            #     value = cls.safe_decimal(value)
+            #     if value is None:
+            #         print("INVALID DECIMAL VALUE")
+            #         continue
+            
+            init_data[field] = value
+            
         product_name = init_data.pop("product_name")
+        
+        
         
         instance, was_created = cls.objects.update_or_create(defaults=init_data, product_name=product_name)
         
@@ -274,24 +285,24 @@ class CPU(Product):
     
     # Clocks
     # Performance
-    clocks_perf_base = OptionalDecField(verbose_name="Performance Core Clock")
-    clocks_perf_boost = OptionalDecField(verbose_name="Performance Core Boost Clock")
+    clocks_perf_base = OptionalFloatField(verbose_name="Performance Core Clock")
+    clocks_perf_boost = OptionalFloatField(verbose_name="Performance Core Boost Clock")
     # Efficiency
-    clocks_eff_base = OptionalDecField()
-    clocks_eff_boost = OptionalDecField()
+    clocks_eff_base = OptionalFloatField()
+    clocks_eff_boost = OptionalFloatField()
     
     # Cache
     cache_l1 = OptionalCharField(max_length=100, verbose_name="L1 Cache") # This explains the l1 cache structure
-    cache_l2 = OptionalDecField(verbose_name="L2 Cache")
-    cache_l3 = OptionalDecField(verbose_name="L3 Cache")
+    cache_l2 = OptionalFloatField(verbose_name="L2 Cache")
+    cache_l3 = OptionalFloatField(verbose_name="L3 Cache")
     
     tdp = OptionalPosIntField(verbose_name="TDP")
     
     # Integrated Graphics
     intgraph_model = OptionalCharField(max_length=100, verbose_name="Integrated Graphics") # The model of integrated graphics
-    intgraph_base_clock = OptionalDecField()
-    intgraph_boost_clock = OptionalDecField()
-    intgraph_shader_count = OptionalDecField()
+    intgraph_base_clock = OptionalFloatField()
+    intgraph_boost_clock = OptionalFloatField()
+    intgraph_shader_count = OptionalFloatField()
     
     ecc_support = OptionalBoolField(verbose_name="ECC Support") # Whether the CPU supports Error-Correcting Code memory
     
@@ -304,7 +315,7 @@ class CPU(Product):
     simul_multithread = OptionalBoolField(verbose_name="Simultaneous Multithreading")
     
     # Memory
-    mem_max_support = OptionalDecField() # In GB
+    mem_max_support = OptionalFloatField() # In GB
     mem_types = models.JSONField(default=list)
     mem_channels = OptionalPosIntField()
     
@@ -364,7 +375,5 @@ class CPU(Product):
     }
     
     class Meta:
-        db_table = ''
-        managed = True
         verbose_name = 'CPU'
         verbose_name_plural = 'CPUs'

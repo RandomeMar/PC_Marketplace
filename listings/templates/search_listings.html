@@ -3,7 +3,7 @@
 {% block title %}PC Marketplace{% endblock %}
 
 {% block content %}
-    <h1>Select a product to make a listing for</h1>
+    <h1>Search for a listing</h1>
     <form action="{% url 'listings:search_listings' p_type=p_type %}" method="get" 
     id="filter_form">
         <input type="search" name="q" value="{% if query %}{{ query }}{% endif %}">

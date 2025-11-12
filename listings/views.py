@@ -5,11 +5,12 @@ from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Min, Max, Model, Q
-from products.models import Product, ProductQuerySet
+from django.db.models import Min, Max, Model, Q, QuerySet
+from products.models import Product
 from .models import Listing, ListingImage
 from .forms import ListingForm, ListingImageFormSet
 from urllib.parse import unquote
+from rapidfuzz import process, fuzz
 
 # Create your views here.
 
@@ -44,12 +45,38 @@ def select_p_type(request: HttpRequest, next_url="search/"):
     }
     return render(request, "select_p_type.html", context=context)
 
+def fuzzy_search(qs: QuerySet, query: str, choice_field: str, score_cutoff=60):
+    """
+    Performs a fuzzy search.
+    
+    """
+    
+    if not qs:
+        return []
+    
+    temp = qs.values_list("id", choice_field)
+    ids, choices = zip(*[(id, name.lower().strip()) for id, name in temp])
+    
+    if not query:
+        return list(qs)
+    
+    matches = process.extract(query, choices, scorer=lambda q, c, score_cutoff=score_cutoff: max(
+            fuzz.token_set_ratio(q, c, score_cutoff=score_cutoff),
+            fuzz.partial_ratio(q, c, score_cutoff=score_cutoff)
+        ),
+        limit=30
+    )
+    
+    
+    matched_ids = [ids[match[2]] for match in matches]
+    matched_products = list(qs.filter(id__in=matched_ids))
+    matched_products.sort(key=lambda p: matched_ids.index(p.id)) # Sorts queryset by match score since querysets don't preserve order
+    return matched_products
+
 
 def search_listings(request: HttpRequest, p_type: str):
     """
     Handles searching for listings.
-    
-    NOT IMPLEMENTED. Need to add "listing_search.html" template.
     
     Args:
         request (HttpRequest): Incoming HTTP request. May include query
@@ -73,9 +100,11 @@ def search_listings(request: HttpRequest, p_type: str):
     if query:
         query = unquote(query)
     
-    matched_listings = Listing.objects.filter(
+    filtered_listings = Listing.objects.filter(
         **l_filter_vals["str"], **l_filter_vals["int"], **l_filter_vals["bool"],
         **p_filter_vals["str"], **p_filter_vals["int"], **p_filter_vals["bool"]) # TODO: NO FUZZY SEARCH YET
+    
+    matched_listings = fuzzy_search(filtered_listings, query, "title")
     
     l_filter_fields = build_filter_fields(Listing, l_filter_vals)
     p_filter_fields = build_filter_fields(product_model, p_filter_vals, "product__")
@@ -153,10 +182,11 @@ def gather_filters(request: HttpRequest, model: type[Model], prefix="") -> dict:
             except ValueError:
                 pass
         
-        elif field.get_internal_type() == "DecimalField":
+        elif field.get_internal_type() == "FloatField":
             # Float/Decimal field
             min_val = request.GET.get(f"{field.name}_min")
             max_val = request.GET.get(f"{field.name}_max")
+            
             
             try:
                 if min_val is None or min_val == "":
@@ -232,7 +262,7 @@ def build_filter_fields(model: type[Model], filter_vals: dict[dict], prefix="") 
                 int_options[field.name]["user_max"] = filter_vals["int"][
                     f"{prefix}{field.name}__lte"]
         
-        elif field.get_internal_type() == "DecimalField":
+        elif field.get_internal_type() == "FloatField":
             # Get float field options
             min_max = model.objects.aggregate(
                 min_val=Min(field.name),
@@ -298,12 +328,14 @@ def search_products(request: HttpRequest, p_type: str):
     if query:
         query = unquote(query)
     
-    matched_products: list[Product] = product_model.objects.filter(
+    filtered_products: QuerySet = product_model.objects.filter(
         **filter_vals["str"],
         **filter_vals["int"],
         **filter_vals["bool"],
-        **filter_vals["float"]
-        ).fuzzy_search(query)
+        **filter_vals["float"],
+        )
+    
+    matched_products = fuzzy_search(filtered_products, query, "product_name")
     
     filter_fields = build_filter_fields(product_model, filter_vals)
     
