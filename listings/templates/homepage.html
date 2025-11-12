@@ -21,8 +21,8 @@
     {% if user.is_authenticated %}
         <p>Hello, <strong>{{ user.username }}</strong>!</p>
         <div class="user-actions">
-            <a href="{% url 'listings:listing_page' %}" class="btn btn-primary">Browse Listings</a>
-            <a href="{% url 'listings:create_listing' %}" class="btn btn-success">Create Listing</a>
+            <a href="{% url 'listings:all_listings_page' %}" class="btn btn-primary">Browse Listings</a>
+            <a href="{% url 'listings:select_p_type_new' %}" class="btn btn-success">Create Listing</a>
             <a href="{% url 'listings:my_listings' %}" class="btn btn-info">My Listings</a>
             <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">My Profile</a>
             <a href="{% url 'accounts:logout' %}" class="btn btn-danger">Logout</a>
@@ -30,7 +30,7 @@
     {% else %}
         <p>Buy and sell PC components with ease!</p>
         <div class="auth-buttons">
-            <a href="{% url 'listings:listing_page' %}" class="btn btn-primary">Browse Listings</a>
+            <a href="{% url 'listings:all_listings_page' %}" class="btn btn-primary">Browse Listings</a>
             <a href="{% url 'accounts:register' %}" class="btn btn-success">Sign Up</a>
             <a href="{% url 'accounts:login' %}" class="btn btn-secondary">Login</a>
         </div>
@@ -42,7 +42,7 @@
     <div class="main-navigation">
         <h2>Browse Marketplace</h2>
         <ul class="nav-links">
-            <li><a href="{% url 'listings:listing_page' %}">Browse Products</a></li>
+            <li><a href="{% url 'listings:all_listings_page' %}">Browse Products</a></li>
             {% if user.is_authenticated %}
                 <li><a href="{% url 'listings:my_listings' %}">My Listings</a></li>
                 <li><a href="#">My Purchases</a></li>

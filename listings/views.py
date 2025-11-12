@@ -335,8 +335,8 @@ def create_listing(request: HttpRequest, p_type: str, p_id: int):
         image_formset = ListingImageFormSet(request.POST, request.FILES)
         
         if form.is_valid() and image_formset.is_valid():
-            listing.product_id = p_id
             listing = form.save(commit=False)
+            listing.product_id = p_id
             listing.owner = request.user
 
             listing.save()
@@ -374,7 +374,7 @@ def load_listing_page(request: HttpRequest, l_id: int):
         l_id (int): The ID of the listing.
     
     Returns:
-        HttpResponse: Renders template "listing_page.html" using the
+        HttpResponse: Renders template "listing_detail.html" using the
             provided listing.
     
     Raises:
@@ -529,12 +529,14 @@ def all_listings_page(request: HttpRequest):
             listings = listings.filter(price__lte=float(max_price))
         except ValueError:
             pass
-    
-    return render(request, "listing_page.html", context={
+        
+    context = {
         "listings": listings,
         "query": query,
         "condition": condition,
         "min_price": min_price,
         "max_price": max_price,
         "condition_choices": Listing.CONDITION_CHOICES,
-    })
+    }
+    
+    return render(request, "all_listings_page.html", context=context)

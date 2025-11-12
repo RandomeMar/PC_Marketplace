@@ -7,7 +7,7 @@
 
 <p><strong>Price:</strong> ${{ listing.price }}</p>
 <p><strong>Condition:</strong> {{ listing.get_condition_display }}</p>
-<p><strong>Product:</strong> {{ listing.product_name }}</p>
+<p><strong>Product:</strong> {{ listing.product.product_name }}</p>
 <p><strong>Stock:</strong> {{ listing.stock }}</p>
 <p><strong>Seller:</strong> {{ listing.owner.username }}</p>
 
@@ -27,6 +27,6 @@
     <a href="{% url 'listings:edit_listing' l_id=listing.id %}">Edit</a>
 {% endif %}
 
-<a href="{% url 'listings:listing_page' %}">Back to Listings</a>
+<a href="{% url 'listings:all_listings_page' %}">Back to Listings</a>
 
 {% endblock %}
