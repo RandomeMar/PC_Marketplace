@@ -97,8 +97,6 @@ class Product(PolymorphicModel):
         "release_year": "metadata.releaseYear"
     }
     
-    
-    
     @staticmethod
     def get_val_from_path(json_dict: dict, path: str):
         """
@@ -152,8 +150,6 @@ class Product(PolymorphicModel):
             init_data[field] = value
             
         product_name = init_data.pop("product_name")
-        
-        
         
         instance, was_created = cls.objects.update_or_create(defaults=init_data, product_name=product_name)
         
@@ -313,28 +309,44 @@ class CPU(Product):
         verbose_name = 'CPU'
         verbose_name_plural = 'CPUs'
 
+
 class GPU(Product):
-    """ ADD """
+    """ Not implemented """
     class Meta:
-        db_table = ''
-        managed = True
         verbose_name = 'GPU'
-        verbose_name_plural = 'GPUs'
+        verbose_name_plural = 'GPUs (Not implemented)'
+
+
+class Motherboard(Product):
+    """ Not implemented """
+    class Meta:
+        verbose_name = "Motherboard"
+        verbose_name_plural = "Motherboards (Not implemented)"
+
+
+class PCCase(Product):
+    """ Not implemented """
+    class Meta:
+        verbose_name = "PC Case"
+        verbose_name_plural = "PC Cases (Not implemented)"
+
+
+class PSU(Product):
+    """ Not implemented """
+    class Meta:
+        verbose_name = "Power Supply"
+        verbose_name_plural = "Power Supplies (Not implemented)"
 
 
 class RAM(Product):
-    """ ADD """
+    """ Not implemented """
     class Meta:
-        db_table = ''
-        managed = True
         verbose_name = 'RAM'
-        verbose_name_plural = 'RAM'
+        verbose_name_plural = 'RAM (Not implemented)'
 
 
 class Storage(Product):
-    """ ADD """
+    """ Not implemented """
     class Meta:
-        db_table = ''
-        managed = True
         verbose_name = 'Storage'
-        verbose_name_plural = 'Storage'
+        verbose_name_plural = 'Storage (Not implemented)'

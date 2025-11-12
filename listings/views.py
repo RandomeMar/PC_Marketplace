@@ -21,6 +21,9 @@ def test(request: HttpRequest):
     return HttpResponse("TESTING")
 
 def homepage(request: HttpRequest):
+    """
+    Renders homepage.html template.
+    """
     print("test")
     return render(request, "homepage.html") 
 
@@ -49,6 +52,13 @@ def fuzzy_search(qs: QuerySet, query: str, choice_field: str, score_cutoff=60):
     """
     Performs a fuzzy search.
     
+    Args:
+        qs (QuerySet): Queryset that fuzzy_search will get choices from.
+        query (str): Query to be matched against.
+        choice_field (str): Field in qs to be compared against the query.
+        score_cutoff (int): Minimum value score to appear in matched_records.
+    Returns:
+        list[Model]: A list of records that most closely match the query.
     """
     
     if not qs:
@@ -67,16 +77,19 @@ def fuzzy_search(qs: QuerySet, query: str, choice_field: str, score_cutoff=60):
         limit=30
     )
     
-    
     matched_ids = [ids[match[2]] for match in matches]
-    matched_products = list(qs.filter(id__in=matched_ids))
-    matched_products.sort(key=lambda p: matched_ids.index(p.id)) # Sorts queryset by match score since querysets don't preserve order
-    return matched_products
+    matched_records: list[Model] = list(qs.filter(id__in=matched_ids))
+    matched_records.sort(key=lambda p: matched_ids.index(p.id)) # Sorts queryset by match score since querysets don't preserve order
+    return matched_records
 
 
 def search_listings(request: HttpRequest, p_type: str):
     """
     Handles searching for listings.
+    
+    This view expects a 'q' query parameter and other filters in the
+    URL. It loads the proper Product subclass, performs a fuzzy search 
+    on listings of the subclass, and renders the search results.
     
     Args:
         request (HttpRequest): Incoming HTTP request. May include query
@@ -101,8 +114,12 @@ def search_listings(request: HttpRequest, p_type: str):
         query = unquote(query)
     
     filtered_listings = Listing.objects.filter(
+        **{f"product__{product_model.__name__.lower()}__isnull": False},
         **l_filter_vals["str"], **l_filter_vals["int"], **l_filter_vals["bool"],
-        **p_filter_vals["str"], **p_filter_vals["int"], **p_filter_vals["bool"])
+        **p_filter_vals["str"], **p_filter_vals["int"], **p_filter_vals["bool"],
+        )
+    
+    
     
     matched_listings = fuzzy_search(filtered_listings, query, "title")
     
@@ -433,7 +450,6 @@ def load_listing_detail(request: HttpRequest, l_id: int):
     }
     
     return render(request, "listing_detail.html", context=context)
-
 
 
 @login_required

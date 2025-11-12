@@ -157,7 +157,10 @@
         <h2>Results</h2>
         <ul>
             {% for listing in listings %}
-                <li><a href="{% url 'listings:load_listing_detail' l_id=listing.id %}">{{ listing.title }}</a></li>
+                <li><a href="{% url 'listings:load_listing_detail' l_id=listing.id %}">
+                <p>Title: {{ listing.title }}</p>
+                <p>Product: {{ listing.product.product_name }}</p>
+                </a></li>
             {% endfor %}
         </ul>
     </div>
