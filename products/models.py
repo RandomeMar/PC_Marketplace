@@ -312,3 +312,29 @@ class CPU(Product):
     class Meta:
         verbose_name = 'CPU'
         verbose_name_plural = 'CPUs'
+
+class GPU(Product):
+    """ ADD """
+    class Meta:
+        db_table = ''
+        managed = True
+        verbose_name = 'GPU'
+        verbose_name_plural = 'GPUs'
+
+
+class RAM(Product):
+    """ ADD """
+    class Meta:
+        db_table = ''
+        managed = True
+        verbose_name = 'RAM'
+        verbose_name_plural = 'RAM'
+
+
+class Storage(Product):
+    """ ADD """
+    class Meta:
+        db_table = ''
+        managed = True
+        verbose_name = 'Storage'
+        verbose_name_plural = 'Storage'
