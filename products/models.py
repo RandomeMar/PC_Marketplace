@@ -35,69 +35,13 @@ class OptionalBoolField(models.BooleanField):
         super().__init__(*args, **kwargs)
 
 
-class ProductQuerySet(PolymorphicQuerySet):
-    """
-    Custom PolymorphicQuerySet for Product models with additional query utility.
-    
-    Methods:
-        fuzzzy_search(query, score_cutoff=0): 
-            Performs a fuzzy search on product names and returns
-            a ranked list of matching Product instances.
-    """
-    def fuzzy_search(self, query: str, score_cutoff=60):
-        """
-        Performs a fuzzy search on product names.
-        
-        Args:
-            query (str): Search string to match against product names.
-            score_cutoff (int): Minimum similarity score.
-        
-        Returns:
-            list[Product]: Ranked Products with similarity score above cutoff.
-        """
-        qs = self.values_list("id", "product_name")
-        if qs:
-            p_ids, p_choices = zip(*[(id, name.lower().strip()) for id, name in qs])
-        else:
-            p_ids, p_choices = ([], [])
-        
-        # This returns 30 best matches based on the provided query.
-        # TODO: I want to replace this eventually with a version of token_set_ratio that does not care about excessive tokens. Basically count instead of ratio
-        matches = process.extract(query, p_choices, scorer=lambda q, c, score_cutoff=score_cutoff: max(
-                fuzz.token_set_ratio(q, c, score_cutoff=score_cutoff),
-                fuzz.partial_ratio(q, c, score_cutoff=score_cutoff)
-            ),
-            limit=30
-        )
-        
-        matched_ids = [p_ids[match[2]] for match in matches]
-        matched_products = list(self.filter(id__in=matched_ids))
-        matched_products.sort(key=lambda p: matched_ids.index(p.id)) # Sorts queryset by match score since querysets don't preserve order
-        return matched_products
-
-
-class ProductManager(PolymorphicManager):
-    """
-    Custom PolymorphicManager for Product models.
-    
-    Returns a ProductQuerySet instance by default. This enables the use
-    of query methods like ".fuzzy_Search".
-    """
-    def get_queryset(self):
-        return ProductQuerySet(self.model, using=self._db)
-    
-    def fuzzy_search(self, query, score_cutoff=0):
-        return self.get_queryset().fuzzy_search(query, score_cutoff)
-
-
-
 # Create your models here.
 class Product(PolymorphicModel):
     """
     A Django model representing a product.
     
-    This model defines common product attributes. It uses a custom
-    model manager "ProductManager" that adds fuzzy search capabilities.
+    This model will never directly be used. Instead, its subclasses will
+    inherit from it.
     
     Attributes:
         product_name (CharField): Name of the product. Required.
@@ -153,7 +97,6 @@ class Product(PolymorphicModel):
         "release_year": "metadata.releaseYear"
     }
     
-    objects = ProductManager() # Uses custom manager so "Product.objects.filter().fuzzy_search()" is possible
     
     
     @staticmethod
@@ -205,15 +148,7 @@ class Product(PolymorphicModel):
         
         for field, path in cls.base_mapping.items():
             value = cls.get_val_from_path(json_dict, path)
-            
             internal_type = cls._meta.get_field(field).get_internal_type()
-            
-            # if internal_type == "FloatField":
-            #     value = cls.safe_decimal(value)
-            #     if value is None:
-            #         print("INVALID DECIMAL VALUE")
-            #         continue
-            
             init_data[field] = value
             
         product_name = init_data.pop("product_name")

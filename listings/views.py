@@ -102,7 +102,7 @@ def search_listings(request: HttpRequest, p_type: str):
     
     filtered_listings = Listing.objects.filter(
         **l_filter_vals["str"], **l_filter_vals["int"], **l_filter_vals["bool"],
-        **p_filter_vals["str"], **p_filter_vals["int"], **p_filter_vals["bool"]) # TODO: NO FUZZY SEARCH YET
+        **p_filter_vals["str"], **p_filter_vals["int"], **p_filter_vals["bool"])
     
     matched_listings = fuzzy_search(filtered_listings, query, "title")
     
