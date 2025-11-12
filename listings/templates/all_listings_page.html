@@ -16,7 +16,7 @@
             <p>Price: ${{ listing.price }}</p>
             <p>Condition: {{ listing.get_condition_display }}</p>
             <p>Seller: {{ listing.owner.username }}</p>
-            <a href="{% url 'listings:load_listing_page' l_id=listing.id %}">View Details</a>
+            <a href="{% url 'listings:load_listing_detail' l_id=listing.id %}">View Details</a>
         </div>
     {% endfor %}
 {% else %}

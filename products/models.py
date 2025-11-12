@@ -363,3 +363,8 @@ class CPU(Product):
         "mem_channels": "specifications.memory.channels"
     }
     
+    class Meta:
+        db_table = ''
+        managed = True
+        verbose_name = 'CPU'
+        verbose_name_plural = 'CPUs'

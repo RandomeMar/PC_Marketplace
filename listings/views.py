@@ -37,7 +37,12 @@ def select_p_type(request: HttpRequest, next_url="search/"):
         HttpResponse: The rendered "select_p_type.html" template with
             a selected next URL.
     """
-    return render(request, "select_p_type.html", context={"next_url": next_url})
+    options = [{"value": p_type.__name__, "name": p_type._meta.verbose_name_plural} for p_type in Product.__subclasses__()]
+    context = {
+        "next_url": next_url,
+        "options": options,
+    }
+    return render(request, "select_p_type.html", context=context)
 
 
 def search_listings(request: HttpRequest, p_type: str):
@@ -328,7 +333,7 @@ def create_listing(request: HttpRequest, p_type: str, p_id: int):
     Returns:
         HttpResponse: Renders the "listing_form.html" template if the
             form is invalid or missing. Redirects to the
-            "load_listing_page" view if the form submission is valid.
+            "load_listing_detail" view if the form submission is valid.
     """
     if request.method == "POST":
         form = ListingForm(request.POST)
@@ -350,7 +355,7 @@ def create_listing(request: HttpRequest, p_type: str, p_id: int):
                     image.save()
             
             messages.success(request, "Listing created successfully!")
-            return redirect("listings:load_listing_page", l_id=listing.id)
+            return redirect("listings:load_listing_detail", l_id=listing.id)
         else:
             messages.error(request, "Please correct the errors in the form.")
     else:
@@ -365,7 +370,7 @@ def create_listing(request: HttpRequest, p_type: str, p_id: int):
     return render(request, "create_listing.html", context=context)
 
 
-def load_listing_page(request: HttpRequest, l_id: int):
+def load_listing_detail(request: HttpRequest, l_id: int):
     """
     Loads the listing page of the provided listing ID.
     
@@ -432,7 +437,7 @@ def edit_listing(request: HttpRequest, l_id: int):
                 image.delete()
             
             messages.success(request, "Listing updated successfully!")
-            return redirect("listings:load_listing_page", l_id=listing.id)
+            return redirect("listings:load_listing_detail", l_id=listing.id)
         else:
             messages.error(request, "Please correct the errors in the form.")
     else:

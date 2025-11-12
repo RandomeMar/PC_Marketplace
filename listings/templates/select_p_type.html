@@ -4,18 +4,12 @@
 
 {% block content %}
     <h1>Select a Product Type</h1>
-    <p>What type of product are you listing?</p>
     
     <form id="select_form">
         <select id="p_type_select" name="p_type">
-            <option value="CPU">CPU (Processor)</option>
-            <option value="GPU">GPU (Graphics Card)</option>
-            <option value="RAM">RAM (Memory)</option>
-            <option value="Storage">Storage (SSD/HDD)</option>
-            <option value="Motherboard">Motherboard</option>
-            <option value="PSU">PSU (Power Supply)</option>
-            <option value="Case">Case</option>
-            <option value="Cooling">Cooling</option>
+            {% for option in options %}
+                <option value="{{ option.value }}">{{ option.name }}</option>
+            {% endfor %}
         </select>
         <button type="submit">Next</button>
     </form>
