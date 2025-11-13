@@ -20,13 +20,11 @@ class OptionalPosIntField(models.PositiveIntegerField):
         kwargs.setdefault('blank', True)
         super().__init__(*args, **kwargs)
 
-class OptionalDecField(models.DecimalField):
-    """Alternative to DecimalField(null=True, blank=True)."""
+class OptionalFloatField(models.FloatField):
+    """Alternative to DecimalField(blank=True)."""
     def __init__(self, *args, **kwargs):
         kwargs.setdefault('null', True)
         kwargs.setdefault('blank', True)
-        kwargs.setdefault('max_digits', 5)
-        kwargs.setdefault('decimal_places', 2)
         super().__init__(*args, **kwargs)
 
 class OptionalBoolField(models.BooleanField):
@@ -37,69 +35,13 @@ class OptionalBoolField(models.BooleanField):
         super().__init__(*args, **kwargs)
 
 
-class ProductQuerySet(PolymorphicQuerySet):
-    """
-    Custom PolymorphicQuerySet for Product models with additional query utility.
-    
-    Methods:
-        fuzzzy_search(query, score_cutoff=0): 
-            Performs a fuzzy search on product names and returns
-            a ranked list of matching Product instances.
-    """
-    def fuzzy_search(self, query: str, score_cutoff=60):
-        """
-        Performs a fuzzy search on product names.
-        
-        Args:
-            query (str): Search string to match against product names.
-            score_cutoff (int): Minimum similarity score.
-        
-        Returns:
-            list[Product]: Ranked Products with similarity score above cutoff.
-        """
-        qs = self.values_list("id", "product_name")
-        if qs:
-            p_ids, p_choices = zip(*[(id, name.lower().strip()) for id, name in qs])
-        else:
-            p_ids, p_choices = ([], [])
-        
-        # This returns 30 best matches based on the provided query.
-        # TODO: I want to replace this eventually with a version of token_set_ratio that does not care about excessive tokens. Basically count instead of ratio
-        matches = process.extract(query, p_choices, scorer=lambda q, c, score_cutoff=score_cutoff: max(
-                fuzz.token_set_ratio(q, c, score_cutoff=score_cutoff),
-                fuzz.partial_ratio(q, c, score_cutoff=score_cutoff)
-            ),
-            limit=30
-        )
-        
-        matched_ids = [p_ids[match[2]] for match in matches]
-        matched_products = list(self.filter(id__in=matched_ids))
-        matched_products.sort(key=lambda p: matched_ids.index(p.id)) # Sorts queryset by match score since querysets don't preserve order
-        return matched_products
-
-
-class ProductManager(PolymorphicManager):
-    """
-    Custom PolymorphicManager for Product models.
-    
-    Returns a ProductQuerySet instance by default. This enables the use
-    of query methods like ".fuzzy_Search".
-    """
-    def get_queryset(self):
-        return ProductQuerySet(self.model, using=self._db)
-    
-    def fuzzy_search(self, query, score_cutoff=0):
-        return self.get_queryset().fuzzy_search(query, score_cutoff)
-
-
-
 # Create your models here.
 class Product(PolymorphicModel):
     """
     A Django model representing a product.
     
-    This model defines common product attributes. It uses a custom
-    model manager "ProductManager" that adds fuzzy search capabilities.
+    This model will never directly be used. Instead, its subclasses will
+    inherit from it.
     
     Attributes:
         product_name (CharField): Name of the product. Required.
@@ -155,9 +97,6 @@ class Product(PolymorphicModel):
         "release_year": "metadata.releaseYear"
     }
     
-    objects = ProductManager() # Uses custom manager so "Product.objects.filter().fuzzy_search()" is possible
-    
-    
     @staticmethod
     def get_val_from_path(json_dict: dict, path: str):
         """
@@ -178,6 +117,7 @@ class Product(PolymorphicModel):
                 return None
             result = result.get(key)
         return result
+    
     
     @classmethod
     def dict_to_model(cls, json_dict: dict):
@@ -205,8 +145,10 @@ class Product(PolymorphicModel):
         init_data = {}
         
         for field, path in cls.base_mapping.items():
-            init_data[field] = cls.get_val_from_path(json_dict, path)
-        
+            value = cls.get_val_from_path(json_dict, path)
+            internal_type = cls._meta.get_field(field).get_internal_type()
+            init_data[field] = value
+            
         product_name = init_data.pop("product_name")
         
         instance, was_created = cls.objects.update_or_create(defaults=init_data, product_name=product_name)
@@ -274,24 +216,24 @@ class CPU(Product):
     
     # Clocks
     # Performance
-    clocks_perf_base = OptionalDecField(verbose_name="Performance Core Clock")
-    clocks_perf_boost = OptionalDecField(verbose_name="Performance Core Boost Clock")
+    clocks_perf_base = OptionalFloatField(verbose_name="Performance Core Clock")
+    clocks_perf_boost = OptionalFloatField(verbose_name="Performance Core Boost Clock")
     # Efficiency
-    clocks_eff_base = OptionalDecField()
-    clocks_eff_boost = OptionalDecField()
+    clocks_eff_base = OptionalFloatField()
+    clocks_eff_boost = OptionalFloatField()
     
     # Cache
     cache_l1 = OptionalCharField(max_length=100, verbose_name="L1 Cache") # This explains the l1 cache structure
-    cache_l2 = OptionalDecField(verbose_name="L2 Cache")
-    cache_l3 = OptionalDecField(verbose_name="L3 Cache")
+    cache_l2 = OptionalFloatField(verbose_name="L2 Cache")
+    cache_l3 = OptionalFloatField(verbose_name="L3 Cache")
     
     tdp = OptionalPosIntField(verbose_name="TDP")
     
     # Integrated Graphics
     intgraph_model = OptionalCharField(max_length=100, verbose_name="Integrated Graphics") # The model of integrated graphics
-    intgraph_base_clock = OptionalDecField()
-    intgraph_boost_clock = OptionalDecField()
-    intgraph_shader_count = OptionalDecField()
+    intgraph_base_clock = OptionalFloatField()
+    intgraph_boost_clock = OptionalFloatField()
+    intgraph_shader_count = OptionalFloatField()
     
     ecc_support = OptionalBoolField(verbose_name="ECC Support") # Whether the CPU supports Error-Correcting Code memory
     
@@ -304,7 +246,7 @@ class CPU(Product):
     simul_multithread = OptionalBoolField(verbose_name="Simultaneous Multithreading")
     
     # Memory
-    mem_max_support = OptionalDecField() # In GB
+    mem_max_support = OptionalFloatField() # In GB
     mem_types = models.JSONField(default=list)
     mem_channels = OptionalPosIntField()
     
@@ -364,7 +306,47 @@ class CPU(Product):
     }
     
     class Meta:
-        db_table = ''
-        managed = True
         verbose_name = 'CPU'
         verbose_name_plural = 'CPUs'
+
+
+class GPU(Product):
+    """ Not implemented """
+    class Meta:
+        verbose_name = 'GPU'
+        verbose_name_plural = 'GPUs (Not implemented)'
+
+
+class Motherboard(Product):
+    """ Not implemented """
+    class Meta:
+        verbose_name = "Motherboard"
+        verbose_name_plural = "Motherboards (Not implemented)"
+
+
+class PCCase(Product):
+    """ Not implemented """
+    class Meta:
+        verbose_name = "PC Case"
+        verbose_name_plural = "PC Cases (Not implemented)"
+
+
+class PSU(Product):
+    """ Not implemented """
+    class Meta:
+        verbose_name = "Power Supply"
+        verbose_name_plural = "Power Supplies (Not implemented)"
+
+
+class RAM(Product):
+    """ Not implemented """
+    class Meta:
+        verbose_name = 'RAM'
+        verbose_name_plural = 'RAM (Not implemented)'
+
+
+class Storage(Product):
+    """ Not implemented """
+    class Meta:
+        verbose_name = 'Storage'
+        verbose_name_plural = 'Storage (Not implemented)'

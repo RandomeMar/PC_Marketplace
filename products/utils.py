@@ -47,7 +47,9 @@ def import_from_opendb(product_model_name: str) -> None:
         with open(item_path, 'r', encoding="utf-8") as f:
             item_data = json.load(f)
         item_instance = product_class.dict_to_model(item_data)
-        print(item_instance.product_name)
+        
+    
+    print("FINISHED IMPORT_FROM_OPEN_DB")
     
     
     
