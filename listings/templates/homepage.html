@@ -1,12 +1,37 @@
 {% extends "base.html" %}
 {% load static %}
 
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/homepage.css' %}">
+{% endblock %}
+
 {% block title %}PC Marketplace{% endblock %}
 
 {% block content %}
 <div class="homepage-container">
-    <h1>Welcome to PC Marketplace</h1>
-    
+
+    <div class="header-row">
+        <h1>PC Marketplace</h1>
+    </div>
+
+    <nav class="nav-bar">
+        {% if user.is_authenticated %}
+            <a href="{% url 'listings:all_listings_page' %}" class="nav-btn">Browse Listings</a>
+            <a href="{% url 'listings:select_p_type' %}" class="nav-btn">Create Listing</a>
+            <a href="{% url 'listings:my_listings' %}" class="nav-btn">My Listings</a>
+        {% else %}
+            <a href="{% url 'listings:listing_page' %}" class="nav-btn">Browse Listings</a>
+            <a href="{% url 'accounts:register' %}" class="nav-btn">Sign Up</a>
+            <a href="{% url 'accounts:login' %}" class="nav-btn">Login</a>
+        {% endif %}
+                {% if user.is_authenticated %}
+            <div class="user-info">
+                <p>Hello, <strong>{{ user.username }}</strong></p>
+                <a href="{% url 'accounts:profile' %}" class="btn-profile">My Profile</a>
+            </div>
+        {% endif %}
+    </nav>
+
     {% if messages %}
         <div class="messages">
             {% for message in messages %}
@@ -17,59 +42,34 @@
         </div>
     {% endif %}
 
-    <div class="user-section">
-    {% if user.is_authenticated %}
-        <p>Hello, <strong>{{ user.username }}</strong>!</p>
-        <div class="user-actions">
-            <a href="{% url 'listings:all_listings_page' %}" class="btn btn-primary">Browse Listings</a>
-            <a href="{% url 'listings:select_p_type_new' %}" class="btn btn-success">Create Listing</a>
-            <a href="{% url 'listings:my_listings' %}" class="btn btn-info">My Listings</a>
-            <a href="{% url 'accounts:profile' %}" class="btn btn-secondary">My Profile</a>
-            <a href="{% url 'accounts:logout' %}" class="btn btn-danger">Logout</a>
+    <div class="main-content">
+        
+        <div class="content-area">
+            <p>test</p>
         </div>
-    {% else %}
-        <p>Buy and sell PC components with ease!</p>
-        <div class="auth-buttons">
-            <a href="{% url 'listings:all_listings_page' %}" class="btn btn-primary">Browse Listings</a>
-            <a href="{% url 'accounts:register' %}" class="btn btn-success">Sign Up</a>
-            <a href="{% url 'accounts:login' %}" class="btn btn-secondary">Login</a>
-        </div>
-    {% endif %}
-</div>
 
-    <hr>
-
-    <div class="main-navigation">
-        <h2>Browse Marketplace</h2>
-        <ul class="nav-links">
-            <li><a href="{% url 'listings:select_p_type' %}">Select a product type to search</a></li>
-            {% if user.is_authenticated %}
-                <li><a href="{% url 'listings:my_listings' %}">My Listings</a></li>
-                <li><a href="#">My Purchases</a></li>
-            {% endif %}
-        </ul>
-    </div>
-
-    <div class="categories">
-        <h2>Popular Categories</h2>
-        <div class="category-grid">
-            <div class="category-card">
-                <h3>CPUs</h3>
-                <p>Find the perfect processor</p>
-            </div>
-            <div class="category-card">
-                <h3>GPUs</h3>
-                <p>Graphics cards for gaming</p>
-            </div>
-            <div class="category-card">
-                <h3>RAM</h3>
-                <p>Memory modules</p>
-            </div>
-            <div class="category-card">
-                <h3>Storage</h3>
-                <p>SSDs and HDDs</p>
+        <div class="sidebar">
+            <h2>Popular Categories</h2>
+            <div class="category-list">
+                <div class="category-card">
+                    <h3>CPUs</h3>
+                    <p>Processors</p>
+                </div>
+                <div class="category-card">
+                    <h3>GPUs</h3>
+                    <p>Graphics cards</p>
+                </div>
+                <div class="category-card">
+                    <h3>RAM</h3>
+                    <p>Memory modules</p>
+                </div>
+                <div class="category-card">
+                    <h3>Storage</h3>
+                    <p>SSDs and HDDs</p>
+                </div>
             </div>
         </div>
+
     </div>
 </div>
 {% endblock %}
