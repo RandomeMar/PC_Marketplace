@@ -29,19 +29,6 @@ class Listing(models.Model):
         upload_time (DateTimeField): Timestamp of listing creation.
     """
     
-    
-    # NOTE: I am getting rid of this because this info is already in the Products model
-    
-    # product_name = models.CharField(max_length=200)  # User types the name
-    # product_type = models.CharField(max_length=50, choices=[
-    #     ('CPU', 'CPU'),
-    #     ('GPU', 'GPU'),
-    #     ('RAM', 'RAM'),
-    #     ('Storage', 'Storage'),
-    #     ('Motherboard', 'Motherboard'),
-    #     #can add more here
-    # ])
-    
     STATUS_CHOICES = [
         ('active', 'Active'),
         ('sold', 'Sold'),
@@ -58,14 +45,7 @@ class Listing(models.Model):
     
     #Relationships
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Owner")
-    
-    # product = models.ForeignKey(Product, on_delete=models.PROTECT, null=True, blank=True)
-    product = models.ForeignKey(Product, on_delete=models.PROTECT) # NOTE: I changed this because a listing should not be able to be made without a product.
-    
-    #product_type = models.CharField(max_length=50, editable=False) # NOTE: This is already in product
-    
-    #product_name = models.CharField(max_length=200, default='Unknown Product', verbose_name="Product Name") # NOTE: This is already in product
-    
+    product = models.ForeignKey(Product, on_delete=models.PROTECT)
     #Basic listing info
     title = models.CharField(max_length=100, verbose_name="Title")
     listing_text = models.TextField(verbose_name="Listing Text")
@@ -93,7 +73,7 @@ class Listing(models.Model):
         ordering = ['-upload_time']
         
     def __str__(self):
-        return f"{self.title} - {self.product_type} - ${self.price}"
+        return f"{self.title} - {self.product.product_name} - ${self.price}"
         
     
     
