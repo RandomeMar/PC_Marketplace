@@ -13,6 +13,19 @@
     {% for listing in listings %}
         <div style="border: 1px solid black; padding: 10px; margin: 10px 0;">
             <h3>{{ listing.title }}</h3>
+            <div style="margin: 5px 0; font-size: 0.9em;">
+                {% if listing.review_count > 0 %}
+                    <span style="color: #ffc107; font-weight: bold;">
+                        &#9733; 
+                        {{ listing.avg_rating|floatformat:1 }} 
+                    </span>
+                    <span style="color: #666;">
+                        ({{ listing.review_count }} Review{{ listing.review_count|pluralize }})
+                    </span>
+                {% else %}
+                    <span style="color: #888;">No reviews yet</span>
+                {% endif %}
+            </div>
             <p>Price: ${{ listing.price }}</p>
             <p>Condition: {{ listing.get_condition_display }}</p>
             <p>Seller: {{ listing.owner.username }}</p>

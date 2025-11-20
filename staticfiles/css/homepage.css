@@ -1,0 +1,129 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: rgb(88, 138, 247);
+}
+
+.homepage-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 15px 30px;
+    border-radius: 10px 10px 0 0;
+}
+
+h1 {
+    color: rgb(88, 138, 247);
+    font-size: 32px;
+    margin: 0;
+}
+
+.btn-profile {
+    background: rgb(88, 138, 247);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    background: white;
+    padding: 15px 30px;
+    border-radius: 0 0 10px 10px;
+    margin-bottom: 30px;
+}
+
+.nav-btn {
+    background: rgb(88, 138, 247);
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+}
+.nav-bar .user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: auto;
+}
+
+.nav-bar .user-info p {
+    color: #333;
+    margin: 0;
+    font-size: 14px;
+}
+.main-content {
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 20px;
+}
+
+.content-area {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+}
+
+.sidebar {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.sidebar h2 {
+    margin-top: 0;
+    color: #333;
+    font-size: 18px;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.category-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.category-card {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.category-card h3 {
+    margin: 0 0 5px 0;
+    color: rgb(88, 138, 247);
+    font-size: 16px;
+}
+
+.category-card p {
+    margin: 0;
+    color: #666;
+    font-size: 12px;
+}
+
+/* Messages */
+.messages {
+    margin: 20px 0;
+}
+
+.alert {
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background: white;
+}

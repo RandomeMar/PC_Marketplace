@@ -15,6 +15,8 @@ urlpatterns = [
     path("new/", views.select_p_type, {"next_url": "search-products/"}, name="select_p_type_new"), # 1. Select a product type.
     path("<str:p_type>/search-products/", views.search_products, name="search_products"), # 2. Search for a product in that product type you want to sell.
     path("<str:p_type>/<int:p_id>/create/", views.create_listing, name="create_listing"), # 3. Fill out listing specific data in a form
+
+    path("add_review/product/<int:product_id>/from_listing/<int:listing_id>", views.add_review, name="add_review"),
     
     # Other listing operations
     path('my-listings/', views.my_listings, name='my_listings'),  # If signed in, look at all of your listings.
