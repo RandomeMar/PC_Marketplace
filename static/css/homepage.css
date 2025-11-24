@@ -1,4 +1,4 @@
-body {
+/* body {
     font-family: Arial, Helvetica, sans-serif;
     margin: 0;
     padding: 0;
@@ -116,7 +116,7 @@ h1 {
     font-size: 12px;
 }
 
-/* Messages */
+Messages
 .messages {
     margin: 20px 0;
 }
@@ -126,4 +126,305 @@ h1 {
     border-radius: 5px;
     margin-bottom: 10px;
     background: white;
+} */
+ /* -------------------------------------------------
+   GLOBAL
+-------------------------------------------------- */
+/* -------------------------------------------------
+   GLOBAL
+-------------------------------------------------- */
+
+:root {
+    --primary: #4A7DFF;
+    --primary-dark: #305AE6;
+    --bg: #F5F6FA;
+    --text: #333;
+    --card-bg: #fff;
+    --radius: 10px;
+    --shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+body {
+    background: rgb(88, 138, 247);
+    color: var(--text);
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+}
+
+/* -------------------------------------------------
+   CONTAINER
+-------------------------------------------------- */
+
+.homepage-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* -------------------------------------------------
+   HEADER
+-------------------------------------------------- */
+
+.header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 15px 30px;
+    border-radius: 10px 10px 0 0;
+}
+
+.header-row h1 {
+    color: rgb(88, 138, 247);
+    font-size: 32px;
+    margin: 0;
+}
+
+/* -------------------------------------------------
+   NAV BAR
+-------------------------------------------------- */
+
+/* -------------------------------------------------
+   GLOBAL
+-------------------------------------------------- */
+
+
+/* -------------------------------------------------
+   VARIABLES
+-------------------------------------------------- */
+:root {
+    --primary: #4A7DFF;
+    --primary-dark: #305AE6;
+    --bg: #F5F6FA;
+    --text: #333;
+    --card-bg: #fff;
+    --radius: 10px;
+    --shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+/* -------------------------------------------------
+   GLOBAL STYLES
+-------------------------------------------------- */
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, sans-serif;
+    margin: 0;
+}
+
+/* -------------------------------------------------
+   LAYOUT WRAPPER
+-------------------------------------------------- */
+.homepage-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+/* -------------------------------------------------
+   HEADER
+-------------------------------------------------- */
+.header-row h1 {
+    font-size: 2.4rem;
+    color: var(--primary);
+    margin-bottom: 20px;
+}
+
+/* -------------------------------------------------
+   NAVIGATION BAR
+-------------------------------------------------- */
+.nav-bar {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: var(--card-bg);
+    padding: 12px 18px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    flex-wrap: wrap;
+}
+
+/* Nav buttons scoped to nav-bar */
+.nav-bar .nav-btn {
+    padding: 10px 18px;
+    text-decoration: none;
+    font-weight: 600;
+    background: var(--primary);
+    color: white;
+    border-radius: var(--radius);
+    transition: 0.25s ease;
+}
+
+.nav-bar .nav-btn:hover {
+    background: var(--primary-dark);
+}
+
+/* Dropdown menu */
+.nav-bar .dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.nav-bar .dropbtn {
+    background: var(--primary);
+    color: white;
+    padding: 10px 18px;
+    font-size: 16px;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.nav-bar .dropbtn:hover {
+    background: var(--primary-dark);
+}
+
+.nav-bar .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: var(--card-bg);
+    min-width: 160px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-radius: var(--radius);
+    z-index: 1;
+    padding: 5px 0;
+}
+
+.nav-bar .dropdown-content a {
+    color: var(--text);
+    padding: 10px 16px;
+    text-decoration: none;
+    display: block;
+    transition: 0.2s;
+}
+
+.nav-bar .dropdown-content a:hover {
+    background-color: #f0f4ff;
+}
+
+.nav-bar .dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* -------------------------------------------------
+   USER INFO
+-------------------------------------------------- */
+.nav-bar .user-info {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-bar .btn-profile {
+    background: transparent;
+    border: 2px solid var(--primary);
+    padding: 8px 14px;
+    border-radius: var(--radius);
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.25s;
+}
+
+.nav-bar .btn-profile:hover {
+    background: var(--primary);
+    color: white;
+}
+
+/* -------------------------------------------------
+   MESSAGES / ALERTS
+-------------------------------------------------- */
+.messages {
+    margin: 20px 0;
+}
+
+.messages .alert {
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.alert-success { background: #d4f8d4; color: #207520; }
+.alert-warning { background: #fff4c2; color: #8a6d00; }
+.alert-error   { background: #ffd3d3; color: #b30000; }
+
+/* -------------------------------------------------
+   MAIN CONTENT GRID
+-------------------------------------------------- */
+.main-content {
+    display: grid;
+    grid-template-columns: 3fr 1fr; /* Content area : Sidebar */
+    gap: 25px;
+    margin-top: 30px;
+}
+
+/* Main content panel */
+.content-area {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+/* -------------------------------------------------
+   SIDEBAR — Popular Categories
+-------------------------------------------------- */
+.sidebar {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.sidebar h2 {
+    margin-bottom: 15px;
+    color: var(--primary-dark);
+}
+
+/* Category cards */
+.category-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.category-card {
+    background: #fafbff;
+    border: 1px solid #e3e7ff;
+    padding: 15px;
+    border-radius: var(--radius);
+    transition: 0.25s ease;
+    cursor: pointer;
+}
+
+.category-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-color: var(--primary);
+}
+
+.category-card h3 {
+    margin-bottom: 5px;
+    color: var(--primary);
+}
+
+/* -------------------------------------------------
+   RESPONSIVE DESIGN
+-------------------------------------------------- */
+@media (max-width: 900px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+
+    .nav-bar {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .nav-bar .user-info {
+        margin-left: 0;
+    }
 }

@@ -3,25 +3,30 @@
 {% block title %}Browse Listings{% endblock %}
 
 {% block content %}
-<h1>Browse Listings</h1>
+<div class="browse-listings-container">
 
-<a href="{% url 'listings:select_p_type_new' %}">+ Create Listing</a>
+    <h1>Browse Listings</h1>
 
-<hr>
+    <a href="{% url 'listings:select_p_type_new' %}" class="create-listing-btn">+ Create Listing</a>
 
-{% if listings %}
-    {% for listing in listings %}
-        <div style="border: 1px solid black; padding: 10px; margin: 10px 0;">
+    <hr>
+
+    {% if listings %}
+        {% for listing in listings %}
+        <div class="listing-card">
             <h3>{{ listing.title }}</h3>
             <p>Price: ${{ listing.price }}</p>
             <p>Condition: {{ listing.get_condition_display }}</p>
             <p>Seller: {{ listing.owner.username }}</p>
-            <a href="{% url 'listings:load_listing_detail' l_id=listing.id %}">View Details</a>
+            <a href="{% url 'listings:load_listing_detail' l_id=listing.id %}" class="view-details-link">View Details</a>
         </div>
-    {% endfor %}
-{% else %}
-    <p>No listings found.</p>
-    <a href="{% url 'listings:select_p_type_new' %}">Create First Listing</a>
-{% endif %}
+        {% endfor %}
+    {% else %}
+        <div class="empty-listings">
+            <p>No listings found.</p>
+            <a href="{% url 'listings:select_p_type_new' %}">Create First Listing</a>
+        </div>
+    {% endif %}
 
-{% endblock %}
+</div>
+{% endblock %} 

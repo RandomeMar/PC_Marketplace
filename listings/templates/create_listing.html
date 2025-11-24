@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+<!-- {% extends "base.html" %}
 
 {% block title %}Create Listing{% endblock %}
 
@@ -12,7 +12,7 @@
 {% endif %}
 
 <!-- SHOW FORM ERRORS -->
-{% if form.errors %}
+<!-- {% if form.errors %}
     <div style="background: #ffcccc; padding: 10px; margin: 10px 0;">
         <h3>Form Errors:</h3>
         {{ form.errors }}
@@ -50,4 +50,45 @@
     <a href="{% url 'listings:all_listings_page' %}">Cancel</a>
 </form>
 
-{% endblock %}
+{% endblock %} --> -->
+
+<div class="create-listing-container">
+
+    <h1>Create New Listing</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="form-global-message form-error-msg">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {% for field in form %}
+        <div class="form-field">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.errors %}
+                <p class="field-error">{{ field.errors }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <h3 class="image-section-title">Images (Optional)</h3>
+        {{ image_formset.management_form }}
+
+        {% for image_form in image_formset %}
+        <div class="image-form-block">
+            {{ image_form.as_p }}
+            <hr>
+        </div>
+        {% endfor %}
+
+        <button type="submit">Create Listing</button>
+        <a href="{% url 'listings:all_listings_page' %}" class="form-cancel-link">Cancel</a>
+    </form>
+
+</div>

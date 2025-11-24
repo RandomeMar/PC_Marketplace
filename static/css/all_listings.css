@@ -1,0 +1,135 @@
+/* -------------------------------------------------
+   VARIABLES
+-------------------------------------------------- */
+:root {
+    --primary: #4A7DFF;
+    --primary-dark: #305AE6;
+    --card-bg: #fff;
+    --text: #333;
+    --radius: 10px;
+    --shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+/* -------------------------------------------------
+   CONTAINER
+-------------------------------------------------- */
+.browse-listings-container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+/* Page Title */
+.browse-listings-container h1 {
+    font-size: 2rem;
+    color: var(--primary);
+    margin-bottom: 20px;
+}
+
+/* Create Listing Button / Link */
+.create-listing-btn {
+    display: inline-block;
+    margin-bottom: 20px;
+    padding: 10px 18px;
+    background: var(--primary);
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: var(--radius);
+    transition: 0.25s ease;
+}
+
+.create-listing-btn:hover {
+    background: var(--primary-dark);
+}
+
+/* Separator */
+.browse-listings-container hr {
+    border: none;
+    height: 1px;
+    background: #e2e6ff;
+    margin: 20px 0;
+}
+
+/* -------------------------------------------------
+   LISTING CARDS
+-------------------------------------------------- */
+.listing-card {
+    background: var(--card-bg);
+    border: 1px solid #dde2ff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    transition: 0.25s ease;
+}
+
+.listing-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.12);
+    border-color: var(--primary);
+}
+
+/* Listing Details */
+.listing-card h3 {
+    font-size: 1.4rem;
+    color: var(--primary-dark);
+    margin-bottom: 8px;
+}
+
+.listing-card p {
+    margin: 4px 0;
+    color: var(--text);
+}
+
+/* View Details link */
+.view-details-link {
+    display: inline-block;
+    margin-top: 10px;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.25s;
+}
+
+.view-details-link:hover {
+    text-decoration: underline;
+}
+
+/* -------------------------------------------------
+   EMPTY STATE
+-------------------------------------------------- */
+.empty-listings {
+    text-align: center;
+    margin-top: 50px;
+    color: var(--text);
+}
+
+.empty-listings a {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 10px 18px;
+    background: var(--primary);
+    color: white;
+    text-decoration: none;
+    border-radius: var(--radius);
+    font-weight: 600;
+    transition: 0.25s;
+}
+
+.empty-listings a:hover {
+    background: var(--primary-dark);
+}
+
+/* -------------------------------------------------
+   RESPONSIVE DESIGN
+-------------------------------------------------- */
+@media (max-width: 900px) {
+    .browse-listings-container {
+        padding: 0 15px;
+    }
+
+    .listing-card {
+        padding: 15px;
+    }
+}
