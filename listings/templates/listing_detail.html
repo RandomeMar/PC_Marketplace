@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+<!-- {% extends "base.html" %}
 
 {% block title %}{{ listing.title }}{% endblock %}
 
@@ -29,4 +29,34 @@
 
 <a href="{% url 'listings:all_listings_page' %}">Back to Listings</a>
 
+{% endblock %} -->
+
+{% extends "base.html" %}
+
+{% block title %}{{ listing.title }}{% endblock %}
+
+{% block content %}
+<div class="listing-detail-card">
+    <h1>{{ listing.title }}</h1>
+    <p><strong>Price:</strong> ${{ listing.price }}</p>
+    <p><strong>Condition:</strong> {{ listing.get_condition_display }}</p>
+    <p><strong>Product:</strong> {{ listing.product.product_name }}</p>
+    <p><strong>Stock:</strong> {{ listing.stock }}</p>
+    <p><strong>Seller:</strong> {{ listing.owner.username }}</p>
+    <h3>Description:</h3>
+    <p>{{ listing.listing_text }}</p>
+
+    {% if images %}
+        <h3>Images:</h3>
+        {% for image in images %}
+            <img src="{{ image.image.url }}" alt="{{ image.caption }}">
+        {% endfor %}
+    {% endif %}
+
+    <hr>
+    {% if is_owner %}
+        <a href="{% url 'listings:edit_listing' l_id=listing.id %}" class="create-listing-btn">Edit</a>
+    {% endif %}
+    <a href="{% url 'listings:all_listings_page' %}" class="form-cancel-link">Back to Listings</a>
+</div>
 {% endblock %}

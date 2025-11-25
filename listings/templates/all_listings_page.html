@@ -1,32 +1,40 @@
 {% extends "base.html" %}
+{% load static %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/all_listings.css' %}">
+{% endblock %}
+
 
 {% block title %}Browse Listings{% endblock %}
 
 {% block content %}
-<div class="browse-listings-container">
+<div class="container">
+    <!-- Header with Back button -->
+    <div class="header-row">
+        <h1>Browse Listings</h1>
+        <a href="{% url 'homepage' %}" class="btn btn-secondary">&larr; Back to Homepage</a>
+    </div>
 
-    <h1>Browse Listings</h1>
-
-    <a href="{% url 'listings:select_p_type_new' %}" class="create-listing-btn">+ Create Listing</a>
+    <!-- Create Listing button -->
+    <a href="{% url 'listings:select_p_type_new' %}" class="btn btn-primary">+ Create Listing</a>
 
     <hr>
 
     {% if listings %}
         {% for listing in listings %}
-        <div class="listing-card">
-            <h3>{{ listing.title }}</h3>
-            <p>Price: ${{ listing.price }}</p>
-            <p>Condition: {{ listing.get_condition_display }}</p>
-            <p>Seller: {{ listing.owner.username }}</p>
-            <a href="{% url 'listings:load_listing_detail' l_id=listing.id %}" class="view-details-link">View Details</a>
-        </div>
+            <div class="listing-card">
+                <h3>{{ listing.title }}</h3>
+                <p>Price: ${{ listing.price }}</p>
+                <p>Condition: {{ listing.get_condition_display }}</p>
+                <p>Seller: {{ listing.owner.username }}</p>
+                <a href="{% url 'listings:load_listing_detail' l_id=listing.id %}">View Details</a>
+            </div>
         {% endfor %}
     {% else %}
-        <div class="empty-listings">
+        <div class="no-listings">
             <p>No listings found.</p>
-            <a href="{% url 'listings:select_p_type_new' %}">Create First Listing</a>
+            <a href="{% url 'listings:select_p_type_new' %}" class="btn btn-primary">Create First Listing</a>
         </div>
     {% endif %}
-
 </div>
-{% endblock %} 
+{% endblock %}
