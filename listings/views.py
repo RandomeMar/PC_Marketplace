@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Min, Max, Model, Q, QuerySet
+from django.db.models import Avg, Count
 from products.models import Product
 from .models import Listing, ListingImage
 from .forms import ListingForm, ListingImageFormSet
@@ -421,6 +422,25 @@ def create_listing(request: HttpRequest, p_type: str, p_id: int):
     
     return render(request, "create_listing.html", context=context)
 
+@login_required
+def add_review(request: HttpRequest, p_id: int, l_id: int):
+    product = get_object_or_404(Product, id=p_id)
+
+    if request.method == "POST":
+        form = ReviewForm(request.POST)
+
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.reviewer = request.user
+            review.product = product
+            review.save()
+            messages.success(request, "Your review has been submitted!")
+        else:
+            messages.error(request, "Please correct the errors in the form.")
+
+    return redirect("listings:load_listing_detail", l_id=listing.id)
+
+
 
 def load_listing_detail(request: HttpRequest, l_id: int):
     """
@@ -562,7 +582,10 @@ def all_listings_page(request: HttpRequest):
     min_price = request.GET.get('min_price', '')
     max_price = request.GET.get('max_price', '')
     
-    listings = Listing.objects.filter(status='active')
+    listings = Listing.objects.filter(status='active').select_related('product').annotate(
+        avg_rating=Avg('product__reviews__rating'),
+        review_count=Count('product__reviews', distinct=True)
+    )
     
     # applies filters
     if query:

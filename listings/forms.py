@@ -1,5 +1,5 @@
 from django import forms
-from .models import Listing, ListingImage
+from .models import Listing, ListingImage, Review
 
 class ListingForm(forms.ModelForm):
     """
@@ -90,3 +90,21 @@ ListingImageFormSet = inlineformset_factory(
     max_num=10,
     can_delete=True
 )
+
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+
+        fields = ['rating', 'comment']
+
+        widgets = {'title': forms.RadioSelect(choices=[
+            (1,     '1'),
+            (1.5,   '1.5'),
+            (2,     '2'),
+            (2.5,   '2.5'),
+            (3,     '3'),
+            (3.5,   '3.5'),
+            (4,     '4'),
+            (4.5,   '4.5'),
+            (5,     '5'),
+            ])}
