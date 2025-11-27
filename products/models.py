@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, utils
 from django.utils import timezone
 from rapidfuzz import process, fuzz
 from polymorphic.models import PolymorphicModel
@@ -150,12 +150,15 @@ class Product(PolymorphicModel):
             init_data[field] = value
             
         product_name = init_data.pop("product_name")
+        try:
+            instance, was_created = cls.objects.update_or_create(defaults=init_data, product_name=product_name)
         
-        instance, was_created = cls.objects.update_or_create(defaults=init_data, product_name=product_name)
+            print(f"Was created = {was_created}")
+            return instance
+        except utils.IntegrityError:
+            for key, value in init_data.items():
+                print(f"{key}: {value}")
         
-        print(f"Was created = {was_created}")
-        
-        return instance
     
     def __str__(self):
         return f"{self.product_name}"
@@ -314,10 +317,104 @@ class CPU(Product):
 
 
 class GPU(Product):
-    """ Not implemented """
+    chipset_manufacturer = OptionalCharField(max_length=100)
+    chipset = OptionalCharField(max_length=100, verbose_name="Chipset")
+
+    memory = OptionalFloatField(verbose_name="Memory")
+    memory_type = OptionalCharField(max_length=100, verbose_name="Memory Type")
+
+    core_base_clock = OptionalFloatField()
+    core_boost_clock = OptionalFloatField()
+    core_count = OptionalPosIntField()
+    effective_memory_clock = OptionalFloatField()
+    memory_bus = OptionalPosIntField()
+
+    interface = OptionalCharField(max_length=100, verbose_name="Interface")
+
+    color = models.JSONField(default=list)
+
+    frame_sync = OptionalCharField(max_length=100, verbose_name="Frame Sync")
+
+    length = OptionalFloatField(verbose_name="Length")
+
+    tdp = OptionalPosIntField(verbose_name="TDP")
+
+    case_expansion_slot_width = OptionalFloatField()
+
+    total_slot_width = OptionalFloatField()
+
+    cooling = OptionalCharField(max_length=100)
+
+    pcie_6_pin = OptionalPosIntField()
+    pcie_8_pin = OptionalPosIntField()
+    pcie_12VHPWR = OptionalPosIntField()
+    pcie_12V_2x6 = OptionalPosIntField()
+
+    hdmi_2_2 = OptionalPosIntField()
+    hdmi_2_1 = OptionalPosIntField()
+    hdmi_2_0 = OptionalPosIntField()
+    displayport_2_1 = OptionalPosIntField()
+    displayport_2_1a = OptionalPosIntField()
+    displayport_1_4a = OptionalPosIntField()
+    displayport_2_1_b = OptionalPosIntField()
+    dvi_d = OptionalPosIntField()
+    vga = OptionalPosIntField()
+
+
+
+
+    FILTER_FIELDS = Product.FILTER_FIELDS + [
+        "chipset", "memory", "memory_type", "interface", "frame_sync", "length", "tdp"
+    ]
+
+    base_mapping = Product.base_mapping.copy()
+    base_mapping |= {
+        "chipset_manufacturer": "chipset_manufacturer",
+        "chipset": "chipset",
+
+        "memory": "memory",
+        "memory_type": "memory_type",
+
+        "core_base_clock": "core_base_clock",
+        "core_boost_clock": "core_boost_clock",
+        "core_count": "core_count",
+        "effective_memory_clock": "effective_memory_clock",
+        "memory_bus": "memory_bus",
+
+        "interface": "interface",
+
+        "color": "color",
+
+        "frame_sync": "frame_sync",
+
+        "length": "length",
+
+        "tdp": "tdp",
+
+        "case_expansion_slot_width": "case_expansion_slot_width",
+
+        "total_slot_width": "total_slot_width",
+
+        "cooling": "cooling",
+
+        "pcie_6_pin": "power_connectors.pcie_6_pin",
+        "pcie_8_pin": "power_connectors.pcie_8_pin",
+        "pcie_12VHPWR": "power_connectors.pcie_12VHPWR",
+        "pcie_12V_2x6": "power_connectors.pcie_12V_2x6",
+
+        "hdmi_2_2": "video_outputs.hdmi_2_2",
+        "hdmi_2_1": "video_outputs.hdmi_2_1",
+        "hdmi_2_0": "video_outputs.hdmi_2_0",
+        "displayport_2_1": "video_outputs.displayport_2_1",
+        "displayport_2_1a": "video_outputs.displayport_2_1a",
+        "displayport_1_4a": "video_outputs.displayport_1_4a",
+        "displayport_2_1_b": "video_outputs.displayport_2_1_b",
+        "dvi_d": "video_outputs.dvi_d",
+        "vga": "video_outputs.vga",
+    }
     class Meta:
         verbose_name = 'GPU'
-        verbose_name_plural = 'GPUs (Not implemented)'
+        verbose_name_plural = 'GPUs'
 
 
 class Motherboard(Product):

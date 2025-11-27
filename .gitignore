@@ -8,5 +8,8 @@ buildcores-open-db/
 # Ignore python cache files
 __pycache__/
 
-# Ignore databse files
+# Ignore database files
 *.sqlite3
+
+# Ignore listing_images
+listing_images/

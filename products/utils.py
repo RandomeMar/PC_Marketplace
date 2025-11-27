@@ -26,6 +26,12 @@ def import_from_opendb(product_model_name: str) -> None:
     """
     MODEL_TO_DIR_MAPPING = {
         models.CPU: "CPU",
+        models.GPU: "GPU",
+        models.Motherboard: "Motherboard",
+        models.PCCase: "PCCase",
+        models.PSU: "PSU",
+        models.RAM: "RAM",
+        models.Storage: "Storage",
     }
     
     BUILDCORES_REPO = "https://github.com/buildcores/buildcores-open-db"
@@ -40,7 +46,7 @@ def import_from_opendb(product_model_name: str) -> None:
         Repo.clone_from(BUILDCORES_REPO, LOCAL_PATH)
         print("Repository cloned")
     
-    directory = f"{LOCAL_PATH}/open-db/{MODEL_TO_DIR_MAPPING[product_class]}"
+    directory = f"{LOCAL_PATH}/open-db/{product_model_name}"
     
     for item in os.listdir(directory):
         item_path = os.path.join(directory, item)
