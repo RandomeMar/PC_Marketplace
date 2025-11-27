@@ -31,7 +31,7 @@
     {% if user_has_reviewed %}
         <p>You have already submitted a review for this product. Thank you!</p>
     {% else %}
-        <a href="{% url 'listings:add_review' p_id=listing.product.id l_id=listing.id %}">Add Listing</a>
+        <a href="{% url 'reviews:add_review' l_id=listing.id %}">Add Review</a>
             {% csrf_token %}
             <!--                 
             <div>
@@ -61,34 +61,6 @@
         <p>No reviews for this product yet.</p>
     {% endfor %}
 </div>
-
-<!-- <hr>
-
-<div>
-    <h3>Leave a Review</h3>
-    
-    {% if user.is_authenticated %}
-        {% if user_has_reviewed %}
-            <p>You have already submitted a review for this product. Thank you!</p>
-        {% else %}
-            <a href="{% url 'listings:add_review' p_id=listing.product.id l_id=listing.id %}">Add Listing</a>
-                {% csrf_token %}
-                                
-                <div>
-                    <label style="font-weight: bold;">Rating:</label>
-                    {{ review_form.rating }}
-                </div>
-                
-                <div style="margin-top: 10px;">
-                    <label style="font-weight: bold;">Comment:</label><br>
-                    {{ review_form.comment }}
-                </div>
-                
-        {% endif %}
-    {% else %}
-        <p><a href="{% url 'accounts:login' %}?next={{ request.path }}">Log in</a> to leave a review.</p>
-    {% endif %}
-</div> -->
 
 <hr>
 

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'products',
     'listings',
     'accounts',
+    'reviews',
     'polymorphic',
 ]
 MEDIA_URL = '/media/'

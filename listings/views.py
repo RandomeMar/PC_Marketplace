@@ -9,7 +9,7 @@ from django.db.models import Min, Max, Model, Q, QuerySet
 from django.db.models import Avg, Count
 from products.models import Product
 from .models import Listing, ListingImage
-from .forms import ListingForm, ListingImageFormSet, ReviewForm
+from .forms import ListingForm, ListingImageFormSet
 from urllib.parse import unquote
 from rapidfuzz import process, fuzz
 
@@ -421,34 +421,6 @@ def create_listing(request: HttpRequest, p_type: str, p_id: int):
     }
     
     return render(request, "create_listing.html", context=context)
-
-@login_required
-def add_review(request: HttpRequest, p_id: int, l_id: int):
-    listing = get_object_or_404(Listing, id=l_id)
-
-
-    if request.method == "POST":
-        form = ReviewForm(request.POST)
-
-        if form.is_valid():
-            review = form.save(commit=False)
-            review.reviewer = request.user
-            review.listing = listing
-            review.save()
-            messages.success(request, "Your review has been submitted!")
-            return redirect("listings:load_listing_detail", l_id=l_id)
-        else:
-            messages.error(request, "Please correct the errors in the form.")
-    else:
-        form = ReviewForm()
-    context = {
-        "form": form,
-    }
-
-    return render(request, "review_form.html", context=context)
-
-    
-
 
 
 def load_listing_detail(request: HttpRequest, l_id: int):

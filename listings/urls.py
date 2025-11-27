@@ -15,8 +15,6 @@ urlpatterns = [
     path("new/", views.select_p_type, {"next_url": "search-products/"}, name="select_p_type_new"), # 1. Select a product type.
     path("<str:p_type>/search-products/", views.search_products, name="search_products"), # 2. Search for a product in that product type you want to sell.
     path("<str:p_type>/<int:p_id>/create/", views.create_listing, name="create_listing"), # 3. Fill out listing specific data in a form
-
-    path("add_review/product/<int:p_id>/from_listing/<int:l_id>", views.add_review, name="add_review"),
     
     # Other listing operations
     path('my-listings/', views.my_listings, name='my_listings'),  # If signed in, look at all of your listings.
@@ -35,4 +33,6 @@ path('<int:l_id>/', views.load_listing_page, name='load_listing_page_short'), # 
 
 path('select-type/', views.select_p_type, name='select_p_type'), # Select p_type NOTE: Overrides ""
 path('create/', views.create_listing, name='create_listing'), # Create listing for product of p_type NOTE: Overrides "p_type/p_id/create"
+
+path("add_review/product/<int:p_id>/from_listing/<int:l_id>", views.add_review, name="add_review") NOTE: Moved to reviews/urls.py
 """
