@@ -26,19 +26,43 @@
 
 <h2>Product Reviews</h2>
 
+<!-- THIS IS FOR THE ADD REVIEW BUTTON -->
+{% if user.is_authenticated %}
+    {% if user_has_reviewed %}
+        <p>You have already submitted a review for this product. Thank you!</p>
+    {% else %}
+        <a href="{% url 'listings:add_review' p_id=listing.product.id l_id=listing.id %}">Add Listing</a>
+            {% csrf_token %}
+            <!--                 
+            <div>
+                <label style="font-weight: bold;">Rating:</label>
+                {{ review_form.rating }}
+            </div>
+            
+            <div style="margin-top: 10px;">
+                <label style="font-weight: bold;">Comment:</label><br>
+                {{ review_form.comment }}
+            </div>
+                -->
+    {% endif %}
+{% else %}
+    <p><a href="{% url 'accounts:login' %}?next={{ request.path }}">Log in</a> to leave a review.</p>
+{% endif %}
+
+
 <div style="margin-bottom: 20px;">
-    {% for review in reviews %}
+    {% for review in listing.reviews.all %}
         <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
             <strong>Rating: {{ review.rating }} / 5 Stars</strong>
             <p style="margin-top: 5px;">{{ review.comment|linebreaksbr }}</p>
-            <small>By {{ review.reviewer.username }} on {{ review.created_at|date:"F j, Y" }}</small>
+            <small>By {{ review.reviewer.username }} on {{ review.uploaded_at|date:"F j, Y" }}</small>
         </div>
     {% empty %}
         <p>No reviews for this product yet.</p>
     {% endfor %}
 </div>
 
-<hr>
+<!-- <hr>
 
 <div>
     <h3>Leave a Review</h3>
@@ -47,9 +71,9 @@
         {% if user_has_reviewed %}
             <p>You have already submitted a review for this product. Thank you!</p>
         {% else %}
-            <form method="POST" action="{% url 'listings:add_review' product_id=listing.product.id listing_id=listing.id %}">
+            <a href="{% url 'listings:add_review' p_id=listing.product.id l_id=listing.id %}">Add Listing</a>
                 {% csrf_token %}
-                
+                                
                 <div>
                     <label style="font-weight: bold;">Rating:</label>
                     {{ review_form.rating }}
@@ -60,13 +84,11 @@
                     {{ review_form.comment }}
                 </div>
                 
-                <button type="submit" style="margin-top: 10px;">Submit Review</button>
-            </form>
         {% endif %}
     {% else %}
         <p><a href="{% url 'accounts:login' %}?next={{ request.path }}">Log in</a> to leave a review.</p>
     {% endif %}
-</div>
+</div> -->
 
 <hr>
 

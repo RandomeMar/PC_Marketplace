@@ -9,7 +9,7 @@ from django.db.models import Min, Max, Model, Q, QuerySet
 from django.db.models import Avg, Count
 from products.models import Product
 from .models import Listing, ListingImage
-from .forms import ListingForm, ListingImageFormSet
+from .forms import ListingForm, ListingImageFormSet, ReviewForm
 from urllib.parse import unquote
 from rapidfuzz import process, fuzz
 
@@ -424,7 +424,8 @@ def create_listing(request: HttpRequest, p_type: str, p_id: int):
 
 @login_required
 def add_review(request: HttpRequest, p_id: int, l_id: int):
-    product = get_object_or_404(Product, id=p_id)
+    listing = get_object_or_404(Listing, id=l_id)
+
 
     if request.method == "POST":
         form = ReviewForm(request.POST)
@@ -432,13 +433,21 @@ def add_review(request: HttpRequest, p_id: int, l_id: int):
         if form.is_valid():
             review = form.save(commit=False)
             review.reviewer = request.user
-            review.product = product
+            review.listing = listing
             review.save()
             messages.success(request, "Your review has been submitted!")
+            return redirect("listings:load_listing_detail", l_id=l_id)
         else:
             messages.error(request, "Please correct the errors in the form.")
+    else:
+        form = ReviewForm()
+    context = {
+        "form": form,
+    }
 
-    return redirect("listings:load_listing_detail", l_id=listing.id)
+    return render(request, "review_form.html", context=context)
+
+    
 
 
 
@@ -582,9 +591,9 @@ def all_listings_page(request: HttpRequest):
     min_price = request.GET.get('min_price', '')
     max_price = request.GET.get('max_price', '')
     
-    listings = Listing.objects.filter(status='active').select_related('product').annotate(
-        avg_rating=Avg('product__reviews__rating'),
-        review_count=Count('product__reviews', distinct=True)
+    listings = Listing.objects.filter(status='active').annotate(
+        avg_rating=Avg('reviews__rating'),
+        review_count=Count('reviews', distinct=True)
     )
     
     # applies filters
