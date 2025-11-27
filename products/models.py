@@ -157,6 +157,9 @@ class Product(PolymorphicModel):
         
         return instance
     
+    def __str__(self):
+        return f"{self.product_name}"
+    
         
         
 class CPU(Product):
