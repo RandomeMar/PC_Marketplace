@@ -26,24 +26,9 @@
 
 <h2>Product Reviews</h2>
 
-<!-- THIS IS FOR THE ADD REVIEW BUTTON -->
 {% if user.is_authenticated %}
-    {% if user_has_reviewed %}
-        <p>You have already submitted a review for this product. Thank you!</p>
-    {% else %}
+    {% if not user_has_reviewed and not is_owner %}
         <a href="{% url 'reviews:add_review' l_id=listing.id %}">Add Review</a>
-            {% csrf_token %}
-            <!--                 
-            <div>
-                <label style="font-weight: bold;">Rating:</label>
-                {{ review_form.rating }}
-            </div>
-            
-            <div style="margin-top: 10px;">
-                <label style="font-weight: bold;">Comment:</label><br>
-                {{ review_form.comment }}
-            </div>
-                -->
     {% endif %}
 {% else %}
     <p><a href="{% url 'accounts:login' %}?next={{ request.path }}">Log in</a> to leave a review.</p>
@@ -56,6 +41,12 @@
             <strong>Rating: {{ review.rating }} / 5 Stars</strong>
             <p style="margin-top: 5px;">{{ review.comment|linebreaksbr }}</p>
             <small>By {{ review.reviewer.username }} on {{ review.uploaded_at|date:"F j, Y" }}</small>
+
+            {% if review.reviewer == user %}
+                <a href="{% url 'reviews:edit_review' r_id=review.id %}">Edit</a>
+                <a href="{% url 'reviews:delete_review' r_id=review.id %}">Delete</a>
+            {% endif %}
+
         </div>
     {% empty %}
         <p>No reviews for this product yet.</p>

@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.contrib import messages
+from .models import Review
 from listings.models import Listing
 from .forms import ReviewForm
 
@@ -31,3 +32,41 @@ def add_review(request: HttpRequest, l_id: int):
     }
 
     return render(request, "review_form.html", context=context)
+
+@login_required
+def edit_review(request: HttpRequest, r_id: int):
+    review = get_object_or_404(Review, id=r_id)
+
+    if review.reviewer != request.user:
+        return redirect('/')
+
+    if request.method == "POST":
+        form = ReviewForm(request.POST, instance=review)
+        if form.is_valid():
+            form.save()
+
+            messages.success(request, "Review updated successfully!")
+            return redirect("listings:load_listing_detail", l_id=review.listing.id)
+        else:
+            messages.error(request, "Please correct the errors in the form.")
+    else:
+        form = ReviewForm(instance=review)
+    
+    context = {
+        "form": form
+    }
+    
+    return render(request, "review_form.html", context=context)
+
+@login_required
+def delete_review(request: HttpRequest, r_id: int):
+    review = get_object_or_404(Review, id=r_id)
+
+    if review.reviewer != request.user:
+        return redirect('/')
+
+    review.delete()
+    messages.success(request, "Listing deleted successfully!")
+
+    next_url = request.META.get("HTTP_REFERER")
+    return redirect(next_url)

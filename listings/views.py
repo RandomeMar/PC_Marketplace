@@ -12,6 +12,7 @@ from .models import Listing, ListingImage
 from .forms import ListingForm, ListingImageFormSet
 from urllib.parse import unquote
 from rapidfuzz import process, fuzz
+from reviews.models import Review
 
 # Create your views here.
 
@@ -439,15 +440,18 @@ def load_listing_detail(request: HttpRequest, l_id: int):
         Http404: If there is no listing with the provided ID.
     """
     listing = get_object_or_404(Listing, id=l_id)
-    
     images = listing.images.all()
     
-    is_owner = request.user.is_authenticated and listing.owner == request.user
+    is_owner: bool = listing.owner == request.user
+    user_has_reviewed = False
+    if not is_owner and request.user.is_authenticated:
+        user_has_reviewed: bool = Review.objects.filter(reviewer=request.user, listing=listing).exists()
     
     context = {
         "listing": listing,
         "images": images,
         "is_owner": is_owner,
+        "user_has_reviewed": user_has_reviewed
     }
     
     return render(request, "listing_detail.html", context=context)
