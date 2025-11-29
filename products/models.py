@@ -150,12 +150,19 @@ class Product(PolymorphicModel):
             init_data[field] = value
             
         product_name = init_data.pop("product_name")
+
+
+        # instance, was_created = cls.objects.update_or_create(defaults=init_data, product_name=product_name)
+        # print(f"Was created = {was_created}")
+        # return instance
+
         try:
             instance, was_created = cls.objects.update_or_create(defaults=init_data, product_name=product_name)
         
             print(f"Was created = {was_created}")
             return instance
         except utils.IntegrityError:
+            print(f"product_name: {product_name}")
             for key, value in init_data.items():
                 print(f"{key}: {value}")
         
@@ -418,35 +425,141 @@ class GPU(Product):
 
 
 class Motherboard(Product):
-    """ Not implemented """
+    socket = OptionalCharField(max_length=100, verbose_name="Socket")
+    form_factor = OptionalCharField(max_length=100, verbose_name="Form Factor")
+    chipset = OptionalCharField(max_length=100, verbose_name="Chipset")
+    memory_max = OptionalFloatField()
+    memory_ram_type = OptionalCharField(max_length=100, verbose_name="RAM Type")
+    memory_slots = OptionalPosIntField(verbose_name="RAM Slots")
+
+    color = models.JSONField(default=list, null=True)
+
+    pcie_slots = models.JSONField(default=list, null=True)
+    m2_slots = models.JSONField(default=list, null=True)
+
+    sata_6_gb_s = OptionalPosIntField()
+    sata_3_gb_s = OptionalPosIntField()
+    u2 = OptionalPosIntField()
+
+    onboard_ethernets = models.JSONField(default=list, null=True)
+
+    wireless_networking = OptionalCharField(max_length=100)
+
+    usb_2_0 = OptionalPosIntField()
+    usb_3_2_gen_1 = OptionalPosIntField()
+    usb_3_2_gen_2 = OptionalPosIntField()
+    usb_3_2_gen_2x2 = OptionalPosIntField()
+    usb_4 = OptionalPosIntField()
+    usb_4_80g = OptionalPosIntField()
+
+    cpu_fan = OptionalPosIntField()
+    case_fan = OptionalPosIntField()
+    pump = OptionalPosIntField()
+    cpu_opt = OptionalPosIntField()
+
+    argb_5v = OptionalPosIntField()
+    rgb_12v = OptionalPosIntField()
+
+    FILTER_FIELDS = Product.FILTER_FIELDS + [
+        "socket", "form_factor", "chipset", "memory_ram_type",
+        "memory_slots", "wireless_networking",
+    ]
+
+    base_mapping = Product.base_mapping.copy()
+    base_mapping |= {
+        "socket": "socket",
+        "form_factor": "form_factor",
+        "chipset": "chipset",
+
+        "memory_max": "memory.max",
+        "memory_ram_type": "memory.ram_type",
+        "memory_slots": "memory.slots",
+
+        "color": "color",
+
+        "pcie_slots": "pcie_slots",
+        "m2_slots": "m2_slots",
+
+        "sata_6_gb_s": "storage_devices.sata_6_gb_s",
+        "sata_3_gb_s": "storage_devices.sata_3_gb_s",
+        "u2": "storage_devices.u2",
+
+        "onboard_ethernets": "onboard_ethernets",
+
+        "wireless_networking": "wireless_networking",
+
+        "usb_2_0": "usb_headers.usb_2_0",
+        "usb_3_2_gen_1": "usb_headers.usb_3_2_gen_1",
+        "usb_3_2_gen_2": "usb_headers.usb_3_2_gen_2",
+        "usb_3_2_gen_2x2": "usb_headers.usb_3_2_gen_2x2",
+        "usb_4": "usb_headers.usb_4",
+        "usb_4_80g": "usb_headers.usb_4_80g",
+
+        "cpu_fan": "fan_headers.cpu_fan",
+        "case_fan": "fan_headers.case_fan",
+        "pump": "fan_headers.pump",
+        "cpu_opt": "fan_headers.cpu_opt",
+
+        "argb_5v": "rgb_headers.argb_5v",
+        "rgb_12v": "rgb_headers.rgb_12v",
+
+    }
     class Meta:
         verbose_name = "Motherboard"
-        verbose_name_plural = "Motherboards (Not implemented)"
+        verbose_name_plural = "Motherboards"
 
 
 class PCCase(Product):
-    """ Not implemented """
+    FILTER_FIELDS = Product.FILTER_FIELDS + [
+
+    ]
+
+    base_mapping = Product.base_mapping.copy()
+    base_mapping |= {
+
+    }
     class Meta:
         verbose_name = "PC Case"
         verbose_name_plural = "PC Cases (Not implemented)"
 
 
 class PSU(Product):
-    """ Not implemented """
+    FILTER_FIELDS = Product.FILTER_FIELDS + [
+
+    ]
+
+    base_mapping = Product.base_mapping.copy()
+    base_mapping |= {
+
+    }
     class Meta:
         verbose_name = "Power Supply"
         verbose_name_plural = "Power Supplies (Not implemented)"
 
 
 class RAM(Product):
-    """ Not implemented """
+    FILTER_FIELDS = Product.FILTER_FIELDS + [
+
+    ]
+
+    base_mapping = Product.base_mapping.copy()
+    base_mapping |= {
+
+    }
     class Meta:
         verbose_name = 'RAM'
         verbose_name_plural = 'RAM (Not implemented)'
 
 
 class Storage(Product):
-    """ Not implemented """
+    FILTER_FIELDS = Product.FILTER_FIELDS + [
+
+    ]
+
+    base_mapping = Product.base_mapping.copy()
+    base_mapping |= {
+
+    }
     class Meta:
         verbose_name = 'Storage'
         verbose_name_plural = 'Storage (Not implemented)'
