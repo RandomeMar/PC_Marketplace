@@ -30,3 +30,12 @@
 <a href="{% url 'listings:all_listings_page' %}">Back to Listings</a>
 
 {% endblock %}
+{% if user.is_authenticated and user != listing.owner %}
+    <a href="{% url 'listings:message' listing_id=listing.id %}" style="display: inline-block; padding: 12px 25px; background: #28a745; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; font-size: 16px;">
+        📧 Contact Seller
+    </a>
+{% endif %}
+
+{% if user.is_authenticated and user == listing.owner %}
+    <p style="color: #666; margin-top: 20px;">This is your listing</p>
+{% endif %}

@@ -28,6 +28,11 @@
             <div class="user-info">
                 <p>Hello, <strong>{{ user.username }}</strong></p>
                 <a href="{% url 'accounts:profile' %}" class="btn-profile">My Profile</a>
+                <a href="{% url 'listings:inbox' %}" class="nav-btn">Messages
+    {% if unread_count > 0 %}
+        <span style="background: red; color: white; border-radius: 50%; padding: 2px 8px; font-size: 12px; margin-left: 5px;">{{ unread_count }}</span>
+    {% endif %}
+</a>
             </div>
         {% endif %}
     </nav>
