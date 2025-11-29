@@ -98,3 +98,18 @@ class ListingImage(models.Model):
         if self.is_primary:
             ListingImage.objects.filter(listing=self.listing, is_primary=True).update(is_primary=False)
         super().save(*args, **kwargs)
+
+#Chat system models
+class Message(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
+    listing = models.ForeignKey(Listing, on_delete=models.SET_NULL, null=True, blank=True)
+    message_text = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+    
+    class Meta:
+        ordering = ['-timestamp']
+    
+    def __str__(self):
+        return f"{self.sender.username} to {self.receiver.username}: {self.message_text[:50]}"

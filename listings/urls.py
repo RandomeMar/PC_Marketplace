@@ -24,6 +24,11 @@ urlpatterns = [
     
     # Loads listing detail page
     path("<int:l_id>/", views.load_listing_detail, name="load_listing_detail"),
+    
+    # Chat system
+    path('inbox/', views.inbox, name='inbox'),
+    path('chat/<int:user_id>/', views.conversation, name='data'),
+    path('contact/<int:listing_id>/', views.contact_seller, name='message'),
 ]  
 """
 OLD:

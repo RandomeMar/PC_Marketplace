@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Inbox{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 50px auto; padding: 20px;">
+    <h1>Messages</h1>
+
+    {% if conversations %}
+        <div style="margin-top: 30px;">
+            {% for user in conversations %}
+                <div style="border: 1px solid #ddd; padding: 20px; margin: 10px 0; border-radius: 8px; background: white;">
+                    <a href="{% url 'listings:data' user_id=user.id %}" style="text-decoration: none; color: #333; font-size: 18px;">
+                        <strong>{{ user.username }}</strong>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="margin-top: 20px; color: #666;">No messages yet.</p>
+    {% endif %}
+
+    <a href="{% url 'homepage' %}" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px;">Back to Home</a>
+</div>
+{% endblock %}

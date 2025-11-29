@@ -8,11 +8,13 @@ from django.contrib import messages
 from django.db.models import Min, Max, Model, Q, QuerySet
 from django.db.models import Avg, Count
 from products.models import Product
-from .models import Listing, ListingImage
+from .models import Listing, ListingImage, Message
 from .forms import ListingForm, ListingImageFormSet
 from urllib.parse import unquote
 from rapidfuzz import process, fuzz
 from reviews.models import Review
+from django.contrib.auth.models import User
+
 
 # Create your views here.
 
@@ -604,3 +606,65 @@ def all_listings_page(request: HttpRequest):
     }
     
     return render(request, "all_listings_page.html", context=context)
+
+
+# Chat System
+@login_required
+def inbox(request):
+    sent_to = Message.objects.filter(sender=request.user).values_list('receiver', flat=True).distinct()
+    received_from = Message.objects.filter(receiver=request.user).values_list('sender', flat=True).distinct()
+
+    all_user_ids = set(list(sent_to) + list(received_from))
+    conversations = User.objects.filter(id__in=all_user_ids)
+    
+    unread_count = Message.objects.filter(receiver=request.user, is_read=False).count()
+    
+    return render(request, 'chat/inbox.html', {
+        'conversations': conversations,
+        'unread_count': unread_count
+    })
+
+
+@login_required
+def conversation(request, user_id):
+    other_user = get_object_or_404(User, id=user_id)
+    
+    messages = Message.objects.filter(
+        sender__in=[request.user, other_user],
+        receiver__in=[request.user, other_user]
+    ).order_by('timestamp')
+    
+    Message.objects.filter(sender=other_user, receiver=request.user, is_read=False).update(is_read=True)
+
+    room_name = '_'.join(sorted([str(request.user.id), str(other_user.id)]))
+    
+    return render(request, 'chat/data.html', {
+        'other_user': other_user,
+        'messages': messages,
+        'room_name': room_name
+    })
+
+
+@login_required
+def contact_seller(request, listing_id):
+    listing = get_object_or_404(Listing, id=listing_id)
+    seller = listing.owner
+    
+    if request.user == seller:
+        return redirect('listings:load_listing_detail', l_id=listing_id)
+    
+    if request.method == 'POST':
+        message_text = request.POST.get('message_text')
+        if message_text:
+            Message.objects.create(
+                sender=request.user,
+                receiver=seller,
+                listing=listing,
+                message_text=message_text
+            )
+            return redirect('listings:data', user_id=seller.id)
+    
+    return render(request, 'chat/message.html', {
+        'listing': listing,
+        'seller': seller
+    })
