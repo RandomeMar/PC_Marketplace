@@ -1,0 +1,136 @@
+/* -------------------------------------------------
+   VARIABLES
+-------------------------------------------------- */
+:root {
+    --primary: #4A7DFF;
+    --primary-dark: #305AE6;
+    --bg: #F5F6FA;
+    --text: #333;
+    --card-bg: #fff;
+    --radius: 10px;
+    --shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+/* -------------------------------------------------
+   GLOBAL STYLES
+-------------------------------------------------- */
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, sans-serif;
+    margin: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+/* -------------------------------------------------
+   HEADER AND BUTTONS
+-------------------------------------------------- */
+.header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header-row h1 {
+    font-size: 2.4rem;
+    color: var(--primary);
+    margin: 0;
+}
+
+.btn {
+    padding: 10px 18px;
+    border-radius: var(--radius);
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.25s ease;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+}
+
+.btn-secondary {
+    background: var(--card-bg);
+    border: 1px solid #ccc;
+    color: var(--text);
+}
+
+.btn-secondary:hover {
+    background: #f0f4ff;
+}
+
+/* -------------------------------------------------
+   LISTING CARDS
+-------------------------------------------------- */
+.listing-card {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    transition: 0.25s ease;
+}
+
+.listing-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+}
+
+.listing-card h3 {
+    margin-top: 0;
+    color: var(--primary);
+}
+
+.listing-card p {
+    margin: 5px 0;
+}
+
+.listing-card a {
+    text-decoration: none;
+    color: var(--primary);
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.listing-card a:hover {
+    color: var(--primary-dark);
+}
+
+/* -------------------------------------------------
+   NO LISTINGS MESSAGE
+-------------------------------------------------- */
+.no-listings {
+    text-align: center;
+    margin: 40px 0;
+}
+
+.no-listings a {
+    display: inline-block;
+    margin-top: 15px;
+}
+
+/* -------------------------------------------------
+   RESPONSIVE
+-------------------------------------------------- */
+@media (max-width: 900px) {
+    .header-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .listing-card {
+        padding: 15px;
+    }
+}

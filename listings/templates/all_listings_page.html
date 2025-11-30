@@ -1,19 +1,30 @@
 {% extends "base.html" %}
+{% load static %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/all_listings.css' %}">
+{% endblock %}
+
 
 {% block title %}Browse Listings{% endblock %}
 
 {% block content %}
-<h1>Browse Listings</h1>
+<div class="container">
+    <!-- Header with Back button -->
+    <div class="header-row">
+        <h1>Browse Listings</h1>
+        <a href="{% url 'homepage' %}" class="btn btn-secondary">&larr; Back to Homepage</a>
+    </div>
 
-<a href="{% url 'listings:select_p_type_new' %}">+ Create Listing</a>
+    <!-- Create Listing button -->
+    <a href="{% url 'listings:select_p_type_new' %}" class="btn btn-primary">+ Create Listing</a>
 
-<hr>
+    <hr>
 
-{% if listings %}
-    {% for listing in listings %}
-        <div style="border: 1px solid black; padding: 10px; margin: 10px 0;">
-            <h3>{{ listing.title }}</h3>
-            <div style="margin: 5px 0; font-size: 0.9em;">
+    {% if listings %}
+        {% for listing in listings %}
+            <div class="listing-card">
+                <h3>{{ listing.title }}</h3>
+                <div style="margin: 5px 0; font-size: 0.9em;">
                 {% if listing.review_count > 0 %}
                     <span style="color: #ffc107; font-weight: bold;">
                         &#9733; 
@@ -25,16 +36,18 @@
                 {% else %}
                     <span style="color: #888;">No reviews yet</span>
                 {% endif %}
+                </div>
+                <p>Price: ${{ listing.price }}</p>
+                <p>Condition: {{ listing.get_condition_display }}</p>
+                <p>Seller: {{ listing.owner.username }}</p>
+                <a href="{% url 'listings:load_listing_detail' l_id=listing.id %}">View Details</a>
             </div>
-            <p>Price: ${{ listing.price }}</p>
-            <p>Condition: {{ listing.get_condition_display }}</p>
-            <p>Seller: {{ listing.owner.username }}</p>
-            <a href="{% url 'listings:load_listing_detail' l_id=listing.id %}">View Details</a>
+        {% endfor %}
+    {% else %}
+        <div class="no-listings">
+            <p>No listings found.</p>
+            <a href="{% url 'listings:select_p_type_new' %}" class="btn btn-primary">Create First Listing</a>
         </div>
-    {% endfor %}
-{% else %}
-    <p>No listings found.</p>
-    <a href="{% url 'listings:select_p_type_new' %}">Create First Listing</a>
-{% endif %}
-
+    {% endif %}
+</div>
 {% endblock %}
