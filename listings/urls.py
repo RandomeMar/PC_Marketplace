@@ -19,7 +19,7 @@ urlpatterns = [
     # Other listing operations
     path('my-listings/', views.my_listings, name='my_listings'),  # If signed in, look at all of your listings.
     path('edit/<int:l_id>/', views.edit_listing, name='edit_listing'), # Edit a listing.
-    #path('delete/<int:l_id>/', views.delete_listing, name='delete_listing'),  # Delete a listing (NOT IMPLEMENTED YET)
+    path('delete/<int:l_id>/', views.delete_listing, name='delete_listing'),  # Delete a listing (NOT IMPLEMENTED YET)
     #path('filter/<str:p_type>/', views.filter_by_type, name='filter_by_type'), # Filter listings by product type (NOT IMPLEMENTED YET)
     
     # Loads listing detail page

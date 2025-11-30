@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, Http404
 from django.apps import apps
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.db.models import Min, Max, Model, Q, QuerySet
 from django.db.models import Avg, Count
@@ -502,15 +503,18 @@ def edit_listing(request: HttpRequest, l_id: int):
         form = ListingForm(instance=listing)
         image_formset = ListingImageFormSet(instance=listing)
     
-    return render(request, "listing_form.html", context={
+    context = {
         "form": form,
         "image_formset": image_formset,
         "listing": listing,
         "is_edit": True,
-    })
+    }
+
+    return render(request, "create_listing.html", context=context)
 
 
 @login_required
+@require_POST
 def delete_listing(request: HttpRequest, l_id: int):
     """
     Allows the owner to delete their listing.
@@ -523,16 +527,17 @@ def delete_listing(request: HttpRequest, l_id: int):
         HttpResponse: Confirmation page or redirect after deletion.
     
     Raises:
-        Http404: If the listing doesn't exist or user doesn't own it.
+        Http404: If the listing doesn't exist, the user doesn't own it,
+            or the page was loaded with GET.
     """
     listing = get_object_or_404(Listing, id=l_id, owner=request.user)
-    
-    if request.method == "POST":
-        listing.delete()
-        messages.success(request, "Listing deleted successfully!")
-        return redirect("listings:my_listings")
-    
-    return render(request, "delete_listing.html", context={"listing": listing})
+    listing.delete()
+    messages.success(request, "Listing deleted successfully!")
+
+    next = request.POST.get("next")
+    if not next:
+        next = "listings:my_listings"
+    return redirect(next)
 
 
 @login_required
@@ -548,9 +553,11 @@ def my_listings(request: HttpRequest):
     """
     listings = Listing.objects.filter(owner=request.user).order_by('-upload_time')
     
-    return render(request, "my_listings.html", context={
+    context = {
         "listings": listings,
-    })
+    }
+
+    return render(request, "my_listings.html", context=context)
 
 
 def all_listings_page(request: HttpRequest):

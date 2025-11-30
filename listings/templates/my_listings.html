@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block title %}My Listings{% endblock %}
+
+{% block content%}
+<h1>My Listings</h1>
+<a href="{% url 'listings:select_p_type_new' %}">Add listing +</a>
+<div class="listings-container">
+    {% for listing in listings %}
+        <div class="listing-card">
+            <h3>{{ listing.title }}</h3>
+
+            <!-- TODO: Integrate this into css -->
+            <div style="margin: 5px 0; font-size: 0.9em;">
+            {% if listing.review_count > 0 %}
+                <span style="color: #ffc107; font-weight: bold;">
+                    &#9733; 
+                    {{ listing.avg_rating|floatformat:1 }} 
+                </span>
+                <span style="color: #666;">
+                    ({{ listing.review_count }} Review{{ listing.review_count|pluralize }})
+                </span>
+            {% else %}
+                <span style="color: #888;">No reviews yet</span>
+            {% endif %}
+            </div>
+
+            <p>Price: ${{ listing.price }}</p>
+            <p>Condition: {{ listing.get_condition_display }}</p>
+            <p>Seller: {{ listing.owner.username }}</p>
+            <div class="listing-actions">
+                <a class="btn" href="{% url 'listings:load_listing_detail' l_id=listing.id %}">View Details</a>
+                <a class="btn" href="{% url 'listings:edit_listing' l_id=listing.id %}">Edit</a>
+
+                <form method="post" action="{% url 'listings:delete_listing' l_id=listing.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <button class="btn" type="submit" onclick="return confirm('Delete this listing?');">
+                        Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    {% empty %}
+        <p>You have no listings.</p>
+    {% endfor %}
+</div>
+
+{% endblock %}
