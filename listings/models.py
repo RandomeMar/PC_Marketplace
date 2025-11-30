@@ -45,7 +45,7 @@ class Listing(models.Model):
     ]
     
     #Relationships
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Owner")
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Owner")
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     #Basic listing info
     title = models.CharField(max_length=100, verbose_name="Title")
@@ -113,3 +113,39 @@ class Message(models.Model):
     
     def __str__(self):
         return f"{self.sender.username} to {self.receiver.username}: {self.message_text[:50]}"
+
+
+class Purchase(models.Model):
+
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('complete', 'Complete'),
+        ('failed', 'Failed'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    # FKs
+    listing = models.ForeignKey(Listing, on_delete=models.PROTECT, related_name="purchases")
+    seller = models.ForeignKey(User, on_delete=models.PROTECT, related_name="sales")
+    buyer = models.ForeignKey(User, on_delete=models.PROTECT, related_name="purchases")
+
+    # Meeting details
+    agreed_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Agreed Price")
+    meetup_location = models.CharField(max_length=300, verbose_name="Meetup Location")
+    meetup_time = models.DateTimeField(verbose_name="Meetup Datetime")
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    # Confirmation
+    seller_confirmation = models.BooleanField(default=False)
+    buyer_confirmation = models.BooleanField(default=False)
+
+    # Flagged
+    is_flagged = models.BooleanField(default=False)
+    flag_reason = models.CharField(max_length=500, blank=True, null=True)
+
+    
+
+    
