@@ -1,4 +1,7 @@
-<!-- {% extends "base.html" %}
+{% extends "base.html" %}
+
+{% comment %}
+<!--
 
 {% block title %}{{ listing.title }}{% endblock %}
 
@@ -72,8 +75,8 @@
 <a href="{% url 'listings:all_listings_page' %}">Back to Listings</a>
 
 {% endblock %} -->
+{% endcomment %}
 
-{% extends "base.html" %}
 
 {% block title %}{{ listing.title }}{% endblock %}
 
@@ -99,6 +102,43 @@
     {% if is_owner %}
         <a href="{% url 'listings:edit_listing' l_id=listing.id %}" class="create-listing-btn">Edit</a>
     {% endif %}
+
+    {% if user.is_authenticated and user != listing.owner %}
+        <!-- TODO: Get rid of inline styles -->
+        <a href="{% url 'listings:message' listing_id=listing.id %}" style="display: inline-block; padding: 12px 25px; background: #28a745; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; font-size: 16px;">
+            Contact Seller
+        </a>
+    {% endif %}
+
     <a href="{% url 'listings:all_listings_page' %}" class="form-cancel-link">Back to Listings</a>
 </div>
+
+<div class="reviews-section">
+    <h2>Product Reviews</h2>
+    {% if user.is_authenticated %}
+        {% if not user_has_reviewed and not is_owner %}
+            <a href="{% url 'reviews:add_review' l_id=listing.id %}">Add Review</a>
+        {% endif %}
+    {% else %}
+        <p><a href="{% url 'accounts:login' %}?next={{ request.path }}">Log in</a> to leave a review.</p>
+    {% endif %}
+
+    <div style="margin-bottom: 20px;">
+        {% for review in listing.reviews.all %}
+            <div class="review-card" style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px;">
+                <strong>Rating: {{ review.rating }} / 5 Stars</strong>
+                <p style="margin-top: 5px;">{{ review.comment|linebreaksbr }}</p>
+                <small>By {{ review.reviewer.username }} on {{ review.uploaded_at|date:"F j, Y" }}</small>
+
+                {% if review.reviewer == user %}
+                    <a href="{% url 'reviews:edit_review' r_id=review.id %}">Edit</a>
+                    <a href="{% url 'reviews:delete_review' r_id=review.id %}">Delete</a>
+                {% endif %}
+            </div>
+        {% empty %}
+            <p>No reviews for this product yet.</p>
+        {% endfor %}
+    </div>
+</div>
+
 {% endblock %}

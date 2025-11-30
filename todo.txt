@@ -1,0 +1,17 @@
+This is our todo list. If you want to work on something add your name to the end of the
+task after the period. If there is already a name, work on something else. If you
+completed it, turn the '-' into a 'x'. Feel free to add more tasks when you discover
+them. This is definitely not all of them.
+
+- Do stuff with selenium since that is a requirement for the project.
+
+- Figure out how we will track the status of a purchase.
+
+- Implement the rest of the product models. Mauricio
+
+- Implement "my listings".
+
+- Fix broken features in templates. Certain features like the fields not showing up in "search_listings.html" need to be fixed.
+
+- Update the header section in "base.html" to better match "homepage.html". This will make it so we don't
+    have to write a new header section for every page since almost all of them should have the same options.
