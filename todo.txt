@@ -3,15 +3,35 @@ task after the period. If there is already a name, work on something else. If yo
 completed it, turn the '-' into a 'x'. Feel free to add more tasks when you discover
 them. This is definitely not all of them.
 
+SELENIUM:
 - Do stuff with selenium since that is a requirement for the project.
 
-- Figure out how we will track the status of a purchase.
+FRONT END:
+- Fix broken features in templates. Certain features like the fields not showing
+    up in "search_listings.html" need to be fixed.
 
+- Update the header section in "base.html" to better match "homepage.html".
+    This will make it so we don't have to write a new header section for every
+    page since almost all of them should have the same options.
+
+CHAT:
+- Fix bug where if a customer messages a seller for two seperate listings, both
+    of the conversations are mixed into one. They should be seperate for each
+    listing.
+
+- Add some way for customers and sellers to agree on a price, meetup location,
+    and meetup time from within messages. I think the best option is a
+    "Transaction" model which is tied to a seller, customer, and listing.
+
+LISTINGS:
+- Implement Transaction. Mauricio
+
+x Implement "my listings". Mauricio
+
+PRODUCTS:
 - Implement the rest of the product models. Mauricio
 
-- Implement "my listings".
 
-- Fix broken features in templates. Certain features like the fields not showing up in "search_listings.html" need to be fixed.
 
-- Update the header section in "base.html" to better match "homepage.html". This will make it so we don't
-    have to write a new header section for every page since almost all of them should have the same options.
+
+
