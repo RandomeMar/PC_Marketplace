@@ -510,17 +510,67 @@ class Motherboard(Product):
 
 
 class PCCase(Product):
-    FILTER_FIELDS = Product.FILTER_FIELDS + [
+    form_factor = OptionalCharField(max_length=100, verbose_name="Form Factor")
+    color = models.JSONField(default=list)
+    power_supply = OptionalCharField(max_length=100)
+    power_supply_included = OptionalBoolField(verbose_name="Includes PSU")
+    side_panel = OptionalCharField(max_length=100, verbose_name="Side Panel")
+    has_transparent_side_panel = OptionalBoolField()
+    front_usb_ports = models.JSONField(default=list)
+    max_video_card_length = OptionalFloatField(verbose_name="Max GPU Length")
+    max_cpu_cooler_height = OptionalFloatField(verbose_name="Max CPU Cooler Height")
+    internal_3_5_bays = OptionalPosIntField()
+    internal_2_5_bays = OptionalPosIntField()
+    external_3_5_bays = OptionalPosIntField()
+    external_5_25_bays = OptionalPosIntField()
+    power_supply_shroud = OptionalBoolField(verbose_name="Includes PSU Shroud")
+    expansion_slots = OptionalPosIntField(verbose_name="Expansion Slots")
+    riser_expansion_slots = OptionalPosIntField()
+    supports_rear_connecting_motherboard = OptionalBoolField()
+    
+    width = OptionalFloatField(verbose_name="Width")
+    height = OptionalFloatField(verbose_name="Height")
+    depth = OptionalFloatField(verbose_name="Depth")
+    volume = OptionalFloatField(verbose_name="Volume")
+    weight = OptionalFloatField(verbose_name="Weight")
 
+
+    FILTER_FIELDS = Product.FILTER_FIELDS + [
+        "form_factor", "power_supply_included", "side_panel", "max_video_card_length",
+        "max_cpu_cooler_height", "power_supply_shroud", "expansion_slots",
+        "width", "height", "depth", "volume", "weight"
     ]
 
     base_mapping = Product.base_mapping.copy()
     base_mapping |= {
+        "form_factor": "form_factor",
+        "color": "color",
+        "power_supply": "power_supply",
+        "power_supply_included": "power_supply_included",
+        "side_panel": "side_panel",
+        "has_transparent_side_panel": "has_transparent_side_panel",
+        "front_usb_ports": "front_usb_ports",
+        "max_video_card_length": "max_video_card_length",
+        "max_cpu_cooler_height": "max_cpu_cooler_height",
+        "internal_3_5_bays": "internal_3_5_bays",
+        "internal_2_5_bays": "internal_2_5_bays",
+        "external_3_5_bays": "external_3_5_bays",
+        "external_5_25_bays": "external_5_25_bays",
+        "power_supply_shroud": "power_supply_shroud",
+        "expansion_slots": "expansion_slots",
+        "riser_expansion_slots": "riser_expansion_slots",
+        "supports_rear_connecting_motherboard": "supports_rear_connecting_motherboard",
+        
+        "width": "dimensions_mm.width",
+        "height": "dimensions_mm.height",
+        "depth": "dimensions_mm.depth",
+        "volume": "dimensions_mm.volume",
+        "weight": "dimensions_mm.weight"
 
     }
     class Meta:
         verbose_name = "PC Case"
-        verbose_name_plural = "PC Cases (Not implemented)"
+        verbose_name_plural = "PC Cases"
 
 
 class PSU(Product):
