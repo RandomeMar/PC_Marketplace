@@ -15,11 +15,11 @@ FRONT END:
     page since almost all of them should have the same options.
 
 CHAT:
-- Fix bug where if a customer messages a seller for two seperate listings, both
+x Fix bug where if a customer messages a seller for two seperate listings, both
     of the conversations are mixed into one. They should be seperate for each
     listing. - Edgar
 
-- Add some way for customers and sellers to agree on a price, meetup location,
+x Add some way for customers and sellers to agree on a price, meetup location,
     and meetup time from within messages. I think the best option is a
     "Transaction" model which is tied to a seller, customer, and listing. - Edgar
 
