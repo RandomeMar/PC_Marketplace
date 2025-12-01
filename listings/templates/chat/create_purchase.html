@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Propose Purchase{% endblock %}
+
+{% block content %}
+<div style="max-width: 700px; margin: 50px auto; padding: 20px;">
+    <h1>Propose Purchase Details</h1>
+    
+    <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin: 20px 0;">
+        <p><strong>Listing:</strong> {{ listing.title }}</p>
+        <p><strong>Listed Price:</strong> ${{ listing.price }}</p>
+        <p><strong>With:</strong> {{ other_user.username }}</p>
+    </div>
+
+    <form method="post" style="margin-top: 30px;">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Agreed Price ($)</label>
+            <input type="number" name="agreed_price" step="0.01" value="{{ listing.price }}" required
+                style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px;">
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 5px; font-weight: bold;">Meetup Location</label>
+            <input type="text" name="meetup_location" placeholder="e.g., Starbucks on 5th Ave, Main Campus Library" required
+                style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px;">
+            <small style="color: #666;">Suggest a safe, public location</small>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Meetup Date</label>
+                <input type="date" name="meetup_date" required
+                    style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px;">
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Meetup Time</label>
+                <input type="time" name="meetup_time" required
+                    style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px;">
+            </div>
+        </div>
+        
+        <button type="submit" 
+                style="background: #28a745; color: white; padding: 12px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%;">
+            Send Proposal
+        </button>
+    </form>
+
+    <a href="{% url 'listings:data_listing' user_id=other_user.id listing_id=listing.id %}" 
+    style="display: inline-block; margin-top: 20px; padding: 10px 20px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px;">
+        Back to Chat
+    </a>
+</div>
+{% endblock %}

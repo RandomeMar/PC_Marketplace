@@ -1,8 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from listings.models import Listing, Message
 
 def register_view(request):
     if request.method == 'POST':
@@ -37,5 +39,27 @@ def logout_view(request):
     return redirect('homepage')
 
 @login_required
-def profile_view(request):
-    return render(request, 'accounts/profile.html')
+def profile_view(request, username=None):
+    if username:
+        profile_user = get_object_or_404(User, username=username)
+        is_own_profile = request.user == profile_user
+    else:
+        profile_user = request.user
+        is_own_profile = True
+    
+    listings = Listing.objects.filter(owner=profile_user, status='active').order_by('-upload_time')
+    
+    has_conversation = False
+    if request.user.is_authenticated and not is_own_profile:
+        has_conversation = Message.objects.filter(
+            sender__in=[request.user, profile_user],
+            receiver__in=[request.user, profile_user]).exists()
+    
+    context = {
+        'profile_user': profile_user,
+        'is_own_profile': is_own_profile,
+        'listings': listings,
+        'has_conversation': has_conversation,
+    }
+    
+    return render(request, 'accounts/profile.html', context)

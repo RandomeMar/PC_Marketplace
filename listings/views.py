@@ -15,6 +15,7 @@ from urllib.parse import unquote
 from rapidfuzz import process, fuzz
 from reviews.models import Review
 from django.contrib.auth.models import User
+from .models import Purchase
 
 
 # Create your views here.
@@ -618,11 +619,37 @@ def all_listings_page(request: HttpRequest):
 # Chat System
 @login_required
 def inbox(request):
-    sent_to = Message.objects.filter(sender=request.user).values_list('receiver', flat=True).distinct()
-    received_from = Message.objects.filter(receiver=request.user).values_list('sender', flat=True).distinct()
-
-    all_user_ids = set(list(sent_to) + list(received_from))
-    conversations = User.objects.filter(id__in=all_user_ids)
+    sent_messages = Message.objects.filter(sender=request.user).values('receiver', 'listing').distinct()
+    received_messages = Message.objects.filter(receiver=request.user).values('sender', 'listing').distinct()
+    
+    conversations = []
+    seen = set()
+    
+    for msg in sent_messages:
+        other_user_id = msg['receiver']
+        listing_id = msg['listing']
+        if listing_id:  # Only show specific listing chat rooms
+            key = (other_user_id, listing_id)
+            if key not in seen:
+                other_user = User.objects.get(id=other_user_id)
+                listing = Listing.objects.get(id=listing_id)
+                conversations.append({'user': other_user,'listing': listing,'listing_id': listing_id})
+                seen.add(key)
+    
+    for msg in received_messages:
+        other_user_id = msg['sender']
+        listing_id = msg['listing']
+        if listing_id:
+            key = (other_user_id, listing_id)
+            if key not in seen:
+                other_user = User.objects.get(id=other_user_id)
+                listing = Listing.objects.get(id=listing_id)
+                conversations.append({
+                    'user': other_user,
+                    'listing': listing,
+                    'listing_id': listing_id
+                })
+                seen.add(key)
     
     unread_count = Message.objects.filter(receiver=request.user, is_read=False).count()
     
@@ -633,23 +660,18 @@ def inbox(request):
 
 
 @login_required
-def conversation(request, user_id):
+def conversation(request, user_id, listing_id):
     other_user = get_object_or_404(User, id=user_id)
+    listing = get_object_or_404(Listing, id=listing_id)
     
-    messages = Message.objects.filter(
-        sender__in=[request.user, other_user],
-        receiver__in=[request.user, other_user]
-    ).order_by('timestamp')
+    #Get messages between these two users about a specific listing
+    messages = Message.objects.filter(sender__in=[request.user, other_user],receiver__in=[request.user, other_user],listing=listing).order_by('timestamp')
     
-    Message.objects.filter(sender=other_user, receiver=request.user, is_read=False).update(is_read=True)
+    #marks message as read
+    Message.objects.filter(sender=other_user, receiver=request.user, listing=listing,is_read=False).update(is_read=True)
 
-    room_name = '_'.join(sorted([str(request.user.id), str(other_user.id)]))
-    
-    return render(request, 'chat/data.html', {
-        'other_user': other_user,
-        'messages': messages,
-        'room_name': room_name
-    })
+    room_name = f"{min(request.user.id, other_user.id)}_{max(request.user.id, other_user.id)}_listing_{listing.id}"
+    return render(request, 'chat/data.html', { 'other_user': other_user, 'messages': messages,'room_name': room_name,'listing': listing,})
 
 
 @login_required
@@ -663,15 +685,108 @@ def contact_seller(request, listing_id):
     if request.method == 'POST':
         message_text = request.POST.get('message_text')
         if message_text:
-            Message.objects.create(
-                sender=request.user,
-                receiver=seller,
-                listing=listing,
-                message_text=message_text
-            )
-            return redirect('listings:data', user_id=seller.id)
+            Message.objects.create( sender=request.user, receiver=seller, listing=listing, message_text=message_text)
+            return redirect('listings:data_listing', user_id=seller.id, listing_id=listing_id) #returns to specific listing now
     
     return render(request, 'chat/message.html', {
         'listing': listing,
         'seller': seller
+    })
+
+
+#Purchase Views
+@login_required
+def create_purchase(request, listing_id, user_id):
+    listing = get_object_or_404(Listing, id=listing_id)
+    other_user = get_object_or_404(User, id=user_id)
+    
+    #check to see who's who
+    if request.user == listing.owner:
+        seller = request.user
+        buyer = other_user
+    else:
+        buyer = request.user
+        seller = listing.owner
+    
+    if request.method == 'POST':
+        agreed_price = request.POST.get('agreed_price')
+        meetup_location = request.POST.get('meetup_location')
+        meetup_datetime = request.POST.get('meetup_date') + ' ' + request.POST.get('meetup_time')
+        
+        from django.utils.dateparse import parse_datetime
+        meetup_time = parse_datetime(meetup_datetime)
+        
+        purchase = Purchase.objects.create( listing=listing, seller=seller, buyer=buyer, agreed_price=agreed_price, meetup_location=meetup_location,
+            meetup_time=meetup_time, buyer_confirmation=(request.user == buyer), seller_confirmation=(request.user == seller))
+        
+        Message.objects.create( sender=request.user, receiver=other_user, listing=listing,
+            message_text=f"📋 Purchase Proposal: ${agreed_price} | Meetup: {meetup_location} on {meetup_time.strftime('%b %d, %Y at %I:%M %p')}")
+        
+        messages.success(request, 'Purchase proposal sent!')
+        return redirect('listings:data_listing', user_id=other_user.id, listing_id=listing_id)
+    
+    return render(request, 'chat/create_purchase.html', { 'listing': listing, 'other_user': other_user,})
+
+
+@login_required
+def confirm_purchase(request, purchase_id):
+    purchase = get_object_or_404(Purchase, id=purchase_id)
+    
+    if request.user not in [purchase.buyer, purchase.seller]:
+        messages.error(request, 'You are not part of this purchase.')
+        return redirect('homepage')
+    
+    if request.user == purchase.buyer:
+        purchase.buyer_confirmation = True
+    else:
+        purchase.seller_confirmation = True
+    
+    purchase.save()
+    
+    if purchase.buyer_confirmation and purchase.seller_confirmation:
+        purchase.status = 'complete'
+        purchase.save()
+    
+    other_user = purchase.seller if request.user == purchase.buyer else purchase.buyer
+    Message.objects.create( sender=request.user, receiver=other_user, listing=purchase.listing, message_text=f"{request.user.username} confirmed the purchase!")
+    
+    if purchase.status == 'complete':
+        messages.success(request, 'Both parties confirmed! Purchase complete.')
+    else:
+        messages.success(request, 'You confirmed the purchase. Waiting for other party.')
+    
+    return redirect('listings:data_listing', user_id=other_user.id, listing_id=purchase.listing.id)
+
+
+@login_required
+def cancel_purchase(request, purchase_id):
+    purchase = get_object_or_404(Purchase, id=purchase_id)
+    
+    if request.user not in [purchase.buyer, purchase.seller]:
+        messages.error(request, 'You cannot cancel this purchase.')
+        return redirect('homepage')
+    
+    purchase.status = 'cancelled'
+    purchase.save()
+    
+    other_user = purchase.seller if request.user == purchase.buyer else purchase.buyer
+    Message.objects.create(
+        sender=request.user,
+        receiver=other_user,
+        listing=purchase.listing,
+        message_text=f"{request.user.username} cancelled the purchase."
+    )
+    
+    messages.info(request, 'Purchase cancelled.')
+    return redirect('listings:data_listing', user_id=other_user.id, listing_id=purchase.listing.id)
+
+
+@login_required
+def view_purchases(request):
+    buying = Purchase.objects.filter(buyer=request.user).order_by('-timestamp')
+    selling = Purchase.objects.filter(seller=request.user).order_by('-timestamp')
+    
+    return render(request, 'chat/purchases.html', {
+        'buying': buying,
+        'selling': selling,
     })

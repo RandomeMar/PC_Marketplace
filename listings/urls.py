@@ -25,10 +25,16 @@ urlpatterns = [
     # Loads listing detail page
     path("<int:l_id>/", views.load_listing_detail, name="load_listing_detail"),
     
-    # Chat system
+    # Chat URLs
     path('inbox/', views.inbox, name='inbox'),
-    path('chat/<int:user_id>/', views.conversation, name='data'),
+    path('chat/<int:user_id>/listing/<int:listing_id>/', views.conversation, name='data_listing'),
     path('contact/<int:listing_id>/', views.contact_seller, name='message'),
+    
+    # Purchase URLs
+    path('purchase/create/<int:listing_id>/<int:user_id>/', views.create_purchase, name='create_purchase'),
+    path('purchase/confirm/<int:purchase_id>/', views.confirm_purchase, name='confirm_purchase'),
+    path('purchase/cancel/<int:purchase_id>/', views.cancel_purchase, name='cancel_purchase'),
+    path('purchases/', views.view_purchases, name='view_purchases'),
 ]  
 """
 OLD:

@@ -87,7 +87,12 @@
     <p><strong>Condition:</strong> {{ listing.get_condition_display }}</p>
     <p><strong>Product:</strong> {{ listing.product.product_name }}</p>
     <p><strong>Stock:</strong> {{ listing.stock }}</p>
-    <p><strong>Seller:</strong> {{ listing.owner.username }}</p>
+    <p><strong>Seller:</strong> 
+    <a href="{% url 'accounts:user_profile' username=listing.owner.username %}" 
+    style="color: #007bff; text-decoration: none; font-weight: bold;">
+        {{ listing.owner.username }}
+    </a>
+</p>
     <h3>Description:</h3>
     <p>{{ listing.listing_text }}</p>
 

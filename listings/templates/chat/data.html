@@ -6,6 +6,79 @@
 <div style="max-width: 900px; margin: 50px auto; padding: 20px;">
     <h1>Chat with {{ other_user.username }}</h1>
 
+    {% if listing %}
+        <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <strong>About listing:</strong> 
+            <a href="{% url 'listings:load_listing_detail' l_id=listing.id %}" style="color: #007bff;">{{ listing.title }}</a>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <a href="{% url 'listings:create_purchase' listing_id=listing.id user_id=other_user.id %}" 
+            style="display: inline-block; padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 5px; font-size: 14px;">
+                Propose Purchase Details
+            </a>
+        </div>
+        
+        <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h4 style="margin-top: 0;">Purchase Proposals</h4>
+            {% for purchase in listing.purchases.all %}
+                {% if purchase.buyer == user or purchase.seller == user %}
+                    <div style="background: white; padding: 15px; margin: 10px 0; border-radius: 5px; border: 2px solid 
+                        {% if purchase.status == 'complete' %}#28a745
+                        {% elif purchase.status == 'cancelled' %}#dc3545
+                        {% else %}#6c757d{% endif %};">
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div style="flex: 1;">
+                                <p style="margin: 5px 0;"><strong>Price:</strong> ${{ purchase.agreed_price }}</p>
+                                <p style="margin: 5px 0;"><strong>Location:</strong> {{ purchase.meetup_location }}</p>
+                                <p style="margin: 5px 0;"><strong>Meetup:</strong> {{ purchase.meetup_time|date:"M d, Y \a\t g:i A" }}</p>
+                                <p style="margin: 5px 0;">
+                                    <strong>Status:</strong> 
+                                    {% if purchase.status == 'complete' %}
+                                        <span style="color: #28a745;">Completed</span>
+                                    {% elif purchase.status == 'cancelled' %}
+                                        <span style="color: #dc3545;">Cancelled</span>
+                                    {% elif purchase.status == 'pending' %}
+                                        <span style="color: #ffc107;">Pending Confirmation</span>
+                                    {% endif %}
+                                </p>
+                                <p style="margin: 5px 0; font-size: 12px; color: #666;">
+                                    Buyer: {% if purchase.buyer_confirmation %}Confirmed{% else %}Pending{% endif %} ({{ purchase.buyer.username }}) | 
+                                    Seller: {% if purchase.seller_confirmation %}Confirmed{% else %}Pending{% endif %} ({{ purchase.seller.username }})
+                                </p>
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px;">
+                                {% if purchase.status == 'pending' %}
+                                    {% if user == purchase.buyer and not purchase.buyer_confirmation %}
+                                        <a href="{% url 'listings:confirm_purchase' purchase_id=purchase.id %}" 
+                                        style="display: inline-block; padding: 8px 15px; background: #28a745; color: white; text-decoration: none; border-radius: 5px; font-size: 14px;">
+                                            Confirm
+                                        </a>
+                                    {% elif user == purchase.seller and not purchase.seller_confirmation %}
+                                        <a href="{% url 'listings:confirm_purchase' purchase_id=purchase.id %}" 
+                                        style="display: inline-block; padding: 8px 15px; background: #28a745; color: white; text-decoration: none; border-radius: 5px; font-size: 14px;">
+                                            Confirm
+                                        </a>
+                                    {% endif %}
+                                    
+                                    <a href="{% url 'listings:cancel_purchase' purchase_id=purchase.id %}" 
+                                    style="display: inline-block; padding: 8px 15px; background: #dc3545; color: white; text-decoration: none; border-radius: 5px; font-size: 14px;"
+                                    onclick="return confirm('Are you sure you want to cancel this purchase?')">
+                                        Cancel
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% empty %}
+                <p style="color: #666; margin: 10px 0;">No purchase proposals yet.</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <div id="chat-log" style="border: 1px solid #ddd; padding: 20px; height: 500px; overflow-y: scroll; margin: 20px 0; background: #f9f9f9; border-radius: 8px;">
         {% for message in messages %}
             <div style="margin: 15px 0; {% if message.sender == user %}text-align: right;{% endif %}">
@@ -30,6 +103,7 @@
     const roomName = "{{ room_name }}";
     const currentUser = "{{ user.username }}";
     const otherUserId = {{ other_user.id }};
+    const listingId = {% if listing %}{{ listing.id }}{% else %}null{% endif %};
     
     const chatSocket = new WebSocket(
         'ws://' + window.location.host + '/ws/chat/' + roomName + '/'
@@ -73,7 +147,8 @@
         if (message) {
             chatSocket.send(JSON.stringify({
                 'message': message,
-                'receiver_id': otherUserId
+                'receiver_id': otherUserId,
+                'listing_id': listingId
             }));
             messageInputDom.value = '';
         }

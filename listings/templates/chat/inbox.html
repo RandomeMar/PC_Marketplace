@@ -8,10 +8,12 @@
 
     {% if conversations %}
         <div style="margin-top: 30px;">
-            {% for user in conversations %}
+            {% for conv in conversations %}
                 <div style="border: 1px solid #ddd; padding: 20px; margin: 10px 0; border-radius: 8px; background: white;">
-                    <a href="{% url 'listings:data' user_id=user.id %}" style="text-decoration: none; color: #333; font-size: 18px;">
-                        <strong>{{ user.username }}</strong>
+                    <a href="{% url 'listings:data_listing' user_id=conv.user.id listing_id=conv.listing_id %}" style="text-decoration: none; color: #333;">
+                        <strong>{{ conv.user.username }}</strong>
+                        <br>
+                        <span style="color: #666; font-size: 14px;">About: {{ conv.listing.title }}</span>
                     </a>
                 </div>
             {% endfor %}
