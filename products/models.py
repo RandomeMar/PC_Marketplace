@@ -625,17 +625,52 @@ class PSU(Product):
 
 
 class RAM(Product):
-    FILTER_FIELDS = Product.FILTER_FIELDS + [
+    speed = OptionalPosIntField(verbose_name="Speed")
+    ram_type = OptionalCharField(max_length=50, verbose_name="Ram Type")
+    form_factor = OptionalCharField(max_length=100, verbose_name="Form Factor")
 
+    module_quantity = OptionalPosIntField(verbose_name="Module Quantity")
+    module_capacity_gb = OptionalPosIntField(verbose_name="Capacity Per Module")
+
+    capacity = OptionalPosIntField(verbose_name="Total Capcity")
+    color = models.JSONField(default=list)
+    cas_latency = OptionalFloatField()
+    timings = OptionalCharField(max_length=100)
+    voltage = OptionalPosIntField(verbose_name="Voltage")
+    ecc = OptionalCharField(max_length=50)
+    registered = OptionalCharField(max_length=50)
+    heat_spreader = OptionalBoolField()
+    rgb = OptionalBoolField(verbose_name="Has RGB")
+    height = OptionalFloatField(verbose_name="Height")
+
+    FILTER_FIELDS = Product.FILTER_FIELDS + [
+        "speed", "ram_type", "form_factor", "module_quantity",
+        "module_capacity_gb", "capacity", "voltage", "rgb", "height"
     ]
 
     base_mapping = Product.base_mapping.copy()
     base_mapping |= {
+        "speed": "speed",
+        "ram_type": "ram_type",
+        "form_factor": "form_factor",
 
+        "module_quantity": "modules.quantity",
+        "module_capacity_gb": "modules.capacity_gb",
+
+        "capacity": "capacity",
+        "color": "color",
+        "cas_latency": "cas_latency",
+        "timings": "timings",
+        "voltage": "voltage",
+        "ecc": "ecc",
+        "registered": "registered",
+        "heat_spreader": "heat_spreader",
+        "rgb": "rgb",
+        "height": "height"
     }
     class Meta:
         verbose_name = 'RAM'
-        verbose_name_plural = 'RAM (Not implemented)'
+        verbose_name_plural = 'RAM'
 
 
 class Storage(Product):
