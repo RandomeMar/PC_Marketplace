@@ -636,7 +636,7 @@ class RAM(Product):
     color = models.JSONField(default=list)
     cas_latency = OptionalFloatField()
     timings = OptionalCharField(max_length=100)
-    voltage = OptionalPosIntField(verbose_name="Voltage")
+    voltage = OptionalFloatField(verbose_name="Voltage")
     ecc = OptionalCharField(max_length=50)
     registered = OptionalCharField(max_length=50)
     heat_spreader = OptionalBoolField()
@@ -674,14 +674,26 @@ class RAM(Product):
 
 
 class Storage(Product):
-    FILTER_FIELDS = Product.FILTER_FIELDS + [
+    capacity = OptionalPosIntField(verbose_name="Capacity")
+    type = OptionalCharField(max_length=25, verbose_name="Type")
+    form_factor = OptionalCharField(max_length=25, verbose_name="Form Factor")
+    interface = OptionalCharField(max_length=50, verbose_name="Interface")
+    cache = OptionalFloatField(verbose_name="Cache")
+    nvme = OptionalBoolField(verbose_name="Uses NVME")
 
+    FILTER_FIELDS = Product.FILTER_FIELDS + [
+        "capacity", "type", "form_factor", "interface", "cache", "nvme"
     ]
 
     base_mapping = Product.base_mapping.copy()
     base_mapping |= {
-
+        "capacity": "capacity",
+        "type": "type",
+        "form_factor": "form_factor",
+        "interface": "interface",
+        "cache": "cache",
+        "nvme": "nvme"
     }
     class Meta:
         verbose_name = 'Storage'
-        verbose_name_plural = 'Storage (Not implemented)'
+        verbose_name_plural = 'Storage'
