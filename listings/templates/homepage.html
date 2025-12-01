@@ -16,6 +16,7 @@
 
     <nav class="nav-bar">
         <a href="{% url 'listings:all_listings_page' %}" class="nav-btn">Browse Listings</a>
+        <a href="{% url 'listings:select_p_type' %}" class="nav-btn">Search Listings</a>
         {% if user.is_authenticated %}
             <a href="{% url 'listings:select_p_type_new' %}" class="nav-btn">Create Listing</a>
             <a href="{% url 'listings:my_listings' %}" class="nav-btn">My Listings</a>
@@ -55,20 +56,28 @@
             <h2>Popular Categories</h2>
             <div class="category-list">
                 <div class="category-card">
-                    <h3>CPUs</h3>
-                    <p>Processors</p>
+                    <a href="{% url 'listings:search_listings' p_type="CPU" %}">
+                        <h3>CPUs</h3>
+                        <p>Processors</p>
+                    </a>
                 </div>
                 <div class="category-card">
-                    <h3>GPUs</h3>
-                    <p>Graphics cards</p>
+                    <a href="{% url 'listings:search_listings' p_type="GPU" %}">
+                        <h3>GPUs</h3>
+                        <p>Graphics cards</p>
+                    </a>
                 </div>
                 <div class="category-card">
-                    <h3>RAM</h3>
-                    <p>Memory modules</p>
+                    <a href="{% url 'listings:search_listings' p_type="RAM" %}">
+                        <h3>RAM</h3>
+                        <p>Memory modules</p>
+                    </a>
                 </div>
                 <div class="category-card">
-                    <h3>Storage</h3>
-                    <p>SSDs and HDDs</p>
+                    <a href="{% url 'listings:search_listings' p_type="Storage" %}">
+                        <h3>Storage</h3>
+                        <p>SSDs and HDDs</p>
+                    </a>
                 </div>
             </div>
         </div>
