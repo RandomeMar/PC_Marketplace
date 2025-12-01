@@ -574,17 +574,54 @@ class PCCase(Product):
 
 
 class PSU(Product):
-    FILTER_FIELDS = Product.FILTER_FIELDS + [
+    wattage = OptionalPosIntField(verbose_name="Wattage")
+    form_factor = OptionalCharField(max_length=100, verbose_name="Form Factor")
+    efficiency_rating = OptionalCharField(max_length=100, verbose_name="Efficiency Rating")
+    cybernetics_efficiency_rating = OptionalCharField(max_length=100)
+    cybernetics_noise_rating = OptionalCharField(max_length=100)
+    modular = OptionalCharField(max_length=100, verbose_name="Modular")
+    color = models.JSONField(default=list)
+    length = OptionalFloatField(verbose_name="Length")
+    fanless = OptionalBoolField(verbose_name="Fanless")
+    
+    atx_24_pin = OptionalPosIntField(verbose_name="ATX 24 Pin")
+    eps_8_pin = OptionalPosIntField(verbose_name="EPS 8 Pin")
+    pcie_12vhpwr = OptionalPosIntField(verbose_name="PCIE 12VHPWR")
+    pcie_6_plus_2_pin = OptionalPosIntField(verbose_name="PCIE 6+2")
+    sata = OptionalPosIntField(verbose_name="SATA")
+    molex_4_pin = OptionalPosIntField(verbose_name="Molex 4 Pin")
+    floppy_4_pin = OptionalPosIntField(verbose_name="Floppy 4 Pin")
 
+
+    FILTER_FIELDS = Product.FILTER_FIELDS + [
+        "wattage", "form_factor", "efficiency_rating", "modular", "length",
+        "fanless", "atx_24_pin", "eps_8_pin", "pcie_12vhpwr", "pcie_6_plus_2_pin",
+        "sata", "molex_4_pin", "floppy_4_pin"
     ]
 
     base_mapping = Product.base_mapping.copy()
     base_mapping |= {
-
+        "wattage": "wattage",
+        "form_factor": "form_factor",
+        "efficiency_rating": "efficiency_rating",
+        "cybernetics_efficiency_rating": "cybernetics_efficiency_rating",
+        "cybernetics_noise_rating": "cybernetics_noise_rating",
+        "modular": "modular",
+        "color": "color",
+        "length": "length",
+        "fanless": "fanless",
+        
+        "atx_24_pin": "connectors.atx_24_pin",
+        "eps_8_pin": "connectors.eps_8_pin",
+        "pcie_12vhpwr": "connectors.pcie_12vhpwr",
+        "pcie_6_plus_2_pin": "connectors.pcie_6_plus_2_pin",
+        "sata": "connectors.sata",
+        "molex_4_pin": "connectors.molex_4_pin",
+        "floppy_4_pin": "connectors.floppy_4_pin"
     }
     class Meta:
         verbose_name = "Power Supply"
-        verbose_name_plural = "Power Supplies (Not implemented)"
+        verbose_name_plural = "Power Supplies"
 
 
 class RAM(Product):
