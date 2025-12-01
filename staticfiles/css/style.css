@@ -1,9 +1,42 @@
-body {
-    font-family: Arial, Helvetica, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: rgb(88, 138, 247);;
+/* Header Row */
+.header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 15px 30px;
+    border-radius: 10px 10px 0 0;
 }
-h1 {
-    color:aliceblue;
+
+/* Nav Bar */
+.nav-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    background: white;
+    padding: 15px 30px;
+    border-radius: 0 0 10px 10px;
+    margin-bottom: 30px;
+}
+
+.nav-btn {
+    background: rgb(88, 138, 247);
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.nav-bar .user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-left: auto;
+}
+
+.nav-bar .user-info p {
+    color: #333;
+    margin: 0;
+    font-size: 14px;
 }

@@ -4,6 +4,10 @@ from . import views
 app_name = "listings"
 
 urlpatterns = [
+     # Homepage (index)
+    path('', views.all_listings_page, name='index'),  # This is the homepage, change to your desired view if needed
+
+    # Your other URLs...
     path("test/", views.test, name="test"), # Test view
     path('', views.all_listings_page, name='all_listings_page'),  # Browse all listings
     
