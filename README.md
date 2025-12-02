@@ -19,6 +19,8 @@ python manage.py shell
 
 
 from products.utils import import_from_opendb
+
 import_from_opendb("CPU") # NOTE: This is temp since eventually we will have more than the CPU model
+
 exit()
 
