@@ -17,8 +17,10 @@ python manage.py migrate
 ### 3. Populate Product model
 python manage.py shell
 
-'''python
+
 from products.utils import import_from_opendb
+
 import_from_opendb("CPU") # NOTE: This is temp since eventually we will have more than the CPU model
+
 exit()
-'''
+
