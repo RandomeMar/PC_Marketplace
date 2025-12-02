@@ -77,8 +77,9 @@
 {% endblock %} -->
 {% endcomment %}
 
-
 {% block title %}{{ listing.title }}{% endblock %}
+
+
 
 {% block content %}
 <div class="listing-detail-card">
@@ -103,9 +104,9 @@
         {% endfor %}
     {% endif %}
 
-    <hr>
+    <hr><br>
     {% if is_owner %}
-        <a href="{% url 'listings:edit_listing' l_id=listing.id %}" class="create-listing-btn">Edit</a>
+        <a href="{% url 'listings:edit_listing' l_id=listing.id %}" class="btn btn-primary">Edit</a>
     {% endif %}
 
     {% if user.is_authenticated and user != listing.owner %}
@@ -115,8 +116,10 @@
         </a>
     {% endif %}
 
-    <a href="{% url 'listings:all_listings_page' %}" class="form-cancel-link">Back to Listings</a>
+    <a href="{% url 'listings:all_listings_page' %}" class="btn btn-primary">Back to Listings</a>
 </div>
+
+<br>
 
 <div class="reviews-section">
     <h2>Product Reviews</h2>
