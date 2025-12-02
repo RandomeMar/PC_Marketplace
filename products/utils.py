@@ -24,15 +24,6 @@ def import_from_opendb(product_model_name: str) -> None:
         KeyError: If the model exists but there is no mapping in
             "MODEL_TO_DIR_MAPPING".
     """
-    MODEL_TO_DIR_MAPPING = {
-        models.CPU: "CPU",
-        models.GPU: "GPU",
-        models.Motherboard: "Motherboard",
-        models.PCCase: "PCCase",
-        models.PSU: "PSU",
-        models.RAM: "RAM",
-        models.Storage: "Storage",
-    }
     
     BUILDCORES_REPO = "https://github.com/buildcores/buildcores-open-db"
     LOCAL_PATH = "./buildcores-open-db"
@@ -58,4 +49,6 @@ def import_from_opendb(product_model_name: str) -> None:
     print("FINISHED IMPORT_FROM_OPEN_DB")
     
     
-    
+def import_all():
+    for cls in models.Product.__subclasses__():
+        import_from_opendb(cls.__name__)
