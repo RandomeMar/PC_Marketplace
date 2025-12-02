@@ -3,6 +3,39 @@
 {% block title %}PC Marketplace{% endblock %}
 
 {% block content %}
+<style>
+    #container {
+        padding: 1rem;
+    }
+
+    .result-card {
+        display: flex;
+        gap: 1rem;
+        margin: .5rem;
+        padding: .5rem;
+        border-radius: 0.75rem;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        align-items: flex-start;
+        width: fit-content;
+        transition: box-shadow 0.2s ease;
+    }
+
+    label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    li {
+        display: flex;
+        width: fit-content;
+        white-space: nowrap;
+        gap: 6px;
+    }
+</style>
+
+<div id="container">
     <h1>Select a product to make a listing for</h1>
     <form action="{% url 'listings:search_products' p_type=p_type %}" method="get" 
     id="filter_form">
@@ -15,7 +48,7 @@
             {% for f_name, filter in filter_fields.int.items %}
                 <details>
                     <summary>{{ filter.label }}</summary>
-                    <label>
+                    <label style="display: inline-flex; align-items: center; gap: 6px;">
                         min
                         <input type="number" name="{{ f_name }}_min"
                         value="{{ filter.user_min }}">
@@ -92,8 +125,9 @@
         <h2>Results</h2>
         <ul>
             {% for product in products %}
-                <li><a href="{% url 'listings:create_listing' p_type=p_type p_id=product.id %}">{{ product.product_name }}</a></li>
+                <li class="result-card"><a href="{% url 'listings:create_listing' p_type=p_type p_id=product.id %}">{{ product.product_name }}</a></li>
             {% endfor %}
         </ul>
     </div>
+</div>
 {% endblock %}

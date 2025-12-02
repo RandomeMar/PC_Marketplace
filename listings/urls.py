@@ -40,14 +40,4 @@ urlpatterns = [
     path('purchase/cancel/<int:purchase_id>/', views.cancel_purchase, name='cancel_purchase'),
     path('purchases/', views.view_purchases, name='view_purchases'),
 ]  
-"""
-OLD:
 
-path('view/<int:l_id>/', views.load_listing_page, name='load_listing_page'), # NOTE: Overrides "l_id/"
-path('<int:l_id>/', views.load_listing_page, name='load_listing_page_short'), # NOTE: Overrides "l_id/"
-
-path('select-type/', views.select_p_type, name='select_p_type'), # Select p_type NOTE: Overrides ""
-path('create/', views.create_listing, name='create_listing'), # Create listing for product of p_type NOTE: Overrides "p_type/p_id/create"
-
-path("add_review/product/<int:p_id>/from_listing/<int:l_id>", views.add_review, name="add_review") NOTE: Moved to reviews/urls.py
-"""

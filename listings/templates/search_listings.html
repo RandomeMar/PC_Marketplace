@@ -1,117 +1,5 @@
 {% extends "base.html" %}
 
-{% comment %}
-
-
-{% block title %}PC Marketplace{% endblock %}
-
-{% block content %}
-    <h1>Search for a listing</h1>
-
-    <form action="{% url 'listings:search_listings' p_type=p_type %}" method="get" id="filter_form">
-        <input type="search" name="q" value="{% if query %}{{ query }}{% endif %}" placeholder="Search listings...">
-        <button type="submit">Search</button>
-        <button type="reset">Reset Filters</button>
-
-        <div id="filters">
-            <h2>Filters</h2>
-            <div class="filter-group">
-                <h3>Listing Filters</h3>
-                {% for f_name, filter in l_filter_fields.int.items %}
-                    <details>
-                        <summary>{{ filter.label }}</summary>
-                        <label>min <input type="number" name="{{ f_name }}_min" value="{{ filter.user_min }}"></label>
-                        <label>max <input type="number" name="{{ f_name }}_max" value="{{ filter.user_max }}"></label>
-                    </details>
-                {% endfor %}
-                {% for f_name, filter in l_filter_fields.float.items %}
-                    <details>
-                        <summary>{{ filter.label }}</summary>
-                        <label>min <input type="number" name="{{ f_name }}_min" value="{{ filter.user_min }}" step=".01"></label>
-                        <label>max <input type="number" name="{{ f_name }}_max" value="{{ filter.user_max }}" step=".01"></label>
-                    </details>
-                {% endfor %}
-                {% for f_name, filter in l_filter_fields.str.items %}
-                    <details>
-                        <summary>{{ filter.label }}</summary>
-                        <ul>
-                            {% for option in filter.options %}
-                                <li><input type="checkbox" name="{{ f_name }}" value="{{ option }}" {% if option in filter.user_inputs %}checked{% endif %}> {{ option }}</li>
-                            {% endfor %}
-                        </ul>
-                    </details>
-                {% endfor %}
-                {% for f_name, filter in l_filter_fields.bool.items %}
-                    <details>
-                        <summary>{{ filter.label }}</summary>
-                        <label>Yes <input type="radio" name="{{ f_name }}" value="True" {% if filter.user_input is True %}checked{% endif %}></label>
-                        <label>No <input type="radio" name="{{ f_name }}" value="False" {% if filter.user_input is False %}checked{% endif %}></label>
-                    </details>
-                {% endfor %}
-            </div>
-            <div class="filter-group">
-                <h3>Product Filters</h3>
-                {% for f_name, filter in p_filter_fields.int.items %}
-                    <details>
-                        <summary>{{ filter.label }}</summary>
-                        <label>min <input type="number" name="{{ f_name }}_min" value="{{ filter.user_min }}"></label>
-                        <label>max <input type="number" name="{{ f_name }}_max" value="{{ filter.user_max }}"></label>
-                    </details>
-                {% endfor %}
-                {% for f_name, filter in p_filter_fields.float.items %}
-                    <details>
-                        <summary>{{ filter.label }}</summary>
-                        <label>min <input type="number" name="{{ f_name }}_min" value="{{ filter.user_min }}" step=".01"></label>
-                        <label>max <input type="number" name="{{ f_name }}_max" value="{{ filter.user_max }}" step=".01"></label>
-                    </details>
-                {% endfor %}
-                {% for f_name, filter in p_filter_fields.str.items %}
-                    <details>
-                        <summary>{{ filter.label }}</summary>
-                        <ul>
-                            {% for option in filter.options %}
-                                <li><input type="checkbox" name="{{ f_name }}" value="{{ option }}" {% if option in filter.user_inputs %}checked{% endif %}> {{ option }}</li>
-                            {% endfor %}
-                        </ul>
-                    </details>
-                {% endfor %}
-                {% for f_name, filter in p_filter_fields.bool.items %}
-                    <details>
-                        <summary>{{ filter.label }}</summary>
-                        <label>Yes <input type="radio" name="{{ f_name }}" value="True" {% if filter.user_input is True %}checked{% endif %}></label>
-                        <label>No <input type="radio" name="{{ f_name }}" value="False" {% if filter.user_input is False %}checked{% endif %}></label>
-                    </details>
-                {% endfor %}
-            </div>
-        </div>
-    </form>
-
-    <!-- This script removes unfilled filter fields from the URL before
-    sending the values to the view. -->
-    <script>
-        document.getElementById("filter_form").addEventListener("submit", function (e) {
-            this.querySelectorAll("input, select").forEach(input => {
-                if (!input.value) input.name = "";
-            });
-        });
-    </script>
-
-    <div id="Results">
-        <h2>Results</h2>
-        <ul>
-            {% for listing in listings %}
-                <li><a href="{% url 'listings:load_listing_detail' l_id=listing.id %}">
-                <p>Title: {{ listing.title }}</p>
-                <p>Product: {{ listing.product.product_name }}</p>
-                </a></li>
-            {% endfor %}
-        </ul>
-    </div>
-  {% endblock %} 
-{% endcomment %}
-
-
-
 {% load static %}
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/search_listings.css' %}">
@@ -120,166 +8,201 @@
 {% block title %}Search Listings{% endblock %}
 
 {% block content %}
-<h1>Search Listings</h1>
-<form action="{% url 'listings:search_listings' p_type=p_type %}" method="get" id="filter_form">
-    <input type="search" name="q" value="{{ query|default:'' }}">
-    <button type="submit">Search</button>
+<style>
+    #container {
+        padding: 1rem;
+    }
 
-    <!-- Filters section same as before -->
-    <div id="filters">
-        <h2>Filters</h2>
-        
-        {% for f_name, filter in l_filter_fields.int.items %}
-            <details>
-                <summary>{{ filter.label }}</summary>
-                <label>
-                    min
-                    <input type="number" name="{{ f_name }}_min"
-                    value="{{ filter.user_min }}">
-                </label>
-                <label>
-                    max
-                    <input type="number" name="{{ f_name }}_max"
-                    value="{{ filter.user_max }}">
-                </label>
-            </details>
-        {% endfor %}
+    .result-card {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        align-items: flex-start;
+        width: 100%;
+        max-width: 600px;
+        transition: box-shadow 0.2s ease;
+    }
 
-        {% for f_name, filter in l_filter_fields.float.items %}
-            <details>
-                <summary>{{ filter.label }}</summary>
-                <label>
-                    min
-                    <input type="number" name="{{ f_name }}_min"
-                    value="{{ filter.user_min }}" step=".01">
-                </label>
-                <label>
-                    max
-                    <input type="number" name="{{ f_name }}_max"
-                    value="{{ filter.user_max }}" step=".01">
-                </label>
-            </details>
-        {% endfor %}
+    label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
 
-        {% for f_name, filter in l_filter_fields.str.items %}
-            <details>
-                <summary>{{ filter.label }}</summary>
-                <ul>
-                    {% for option in filter.options %}
-                        <li>
-                            <input type="checkbox" name="{{ f_name }}"
-                            value="{{ option }}"
-                            {% if option in filter.user_inputs %}checked{% endif %}>
-                            {{ option }}
-                        </li>
-                    {% endfor %}
-                </ul>
-            </details>
-        {% endfor %}
+    li {
+        display: flex;
+        width: fit-content;
+        white-space: nowrap;
+        gap: 6px;
+    }
+</style>
 
-        {% for f_name, filter in l_filter_fields.bool.items %}
-            <details>
-                <summary>{{ filter.label }}</summary>
-                <label>
-                    Yes
-                    <input type="radio" name="{{ f_name }}" value="True"
-                    {% if filter.user_input is True %}checked{% endif %}>
-                </label>
-                <label>
-                    No
-                    <input type="radio" name="{{ f_name }}" value="False"
-                    {% if filter.user_input is False %}checked{% endif %}>
-                </label>
-            </details>
-        {% endfor %}
+<div id="container">
 
-        {% for f_name, filter in p_filter_fields.int.items %}
-            <details>
-                <summary>{{ filter.label }}</summary>
-                <label>
-                    min
-                    <input type="number" name="{{ f_name }}_min"
-                    value="{{ filter.user_min }}">
-                </label>
-                <label>
-                    max
-                    <input type="number" name="{{ f_name }}_max"
-                    value="{{ filter.user_max }}">
-                </label>
-            </details>
-        {% endfor %}
+    <h1>Search Listings</h1>
+    <form action="{% url 'listings:search_listings' p_type=p_type %}" method="get" id="filter_form">
+        <input type="search" name="q" value="{{ query|default:'' }}">
+        <button type="submit">Search</button>
 
-        {% for f_name, filter in p_filter_fields.float.items %}
-            <details>
-                <summary>{{ filter.label }}</summary>
-                <label>
-                    min
-                    <input type="number" name="{{ f_name }}_min"
-                    value="{{ filter.user_min }}" step=".01">
-                </label>
-                <label>
-                    max
-                    <input type="number" name="{{ f_name }}_max"
-                    value="{{ filter.user_max }}" step=".01">
-                </label>
-            </details>
-        {% endfor %}
+        <!-- Filters section same as before -->
+        <div id="filters">
+            <h2>Filters</h2>
+            
+            {% for f_name, filter in l_filter_fields.int.items %}
+                <details>
+                    <summary>{{ filter.label }}</summary>
+                    <label>
+                        min
+                        <input type="number" name="{{ f_name }}_min"
+                        value="{{ filter.user_min }}">
+                    </label>
+                    <label>
+                        max
+                        <input type="number" name="{{ f_name }}_max"
+                        value="{{ filter.user_max }}">
+                    </label>
+                </details>
+            {% endfor %}
 
-        {% for f_name, filter in p_filter_fields.str.items %}
-            <details>
-                <summary>{{ filter.label }}</summary>
-                <ul class="filter-options">
-                    {% for option in filter.options %}
-                        <li class="filter-option">
-                            <input type="checkbox" name="{{ f_name }}"
-                            value="{{ option }}"
-                            {% if option in filter.user_inputs %}checked{% endif %}>
-                            {{ option }}
-                        </li>
-                    {% endfor %}
-                </ul>
-            </details>
-        {% endfor %}
+            {% for f_name, filter in l_filter_fields.float.items %}
+                <details>
+                    <summary>{{ filter.label }}</summary>
+                    <label>
+                        min
+                        <input type="number" name="{{ f_name }}_min"
+                        value="{{ filter.user_min }}" step=".01">
+                    </label>
+                    <label>
+                        max
+                        <input type="number" name="{{ f_name }}_max"
+                        value="{{ filter.user_max }}" step=".01">
+                    </label>
+                </details>
+            {% endfor %}
 
-        {% for f_name, filter in p_filter_fields.bool.items %}
-            <details>
-                <summary>{{ filter.label }}</summary>
-                <label>
-                    Yes
-                    <input type="radio" name="{{ f_name }}" value="True"
-                    {% if filter.user_input is True %}checked{% endif %}>
-                </label>
-                <label>
-                    No
-                    <input type="radio" name="{{ f_name }}" value="False"
-                    {% if filter.user_input is False %}checked{% endif %}>
-                </label>
-            </details>
-        {% endfor %}
-    </div>
-</form>
+            {% for f_name, filter in l_filter_fields.str.items %}
+                <details>
+                    <summary>{{ filter.label }}</summary>
+                    <ul>
+                        {% for option in filter.options %}
+                            <li>
+                                <input type="checkbox" name="{{ f_name }}"
+                                value="{{ option }}"
+                                {% if option in filter.user_inputs %}checked{% endif %}>
+                                {{ option }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </details>
+            {% endfor %}
 
-<!-- This script removes unfilled filter fields from the URL before sending the
-values to the view. -->
-<script>
-    document.getElementById("filter_form").addEventListener("submit", function (e) {
-        this.querySelectorAll("input, select").forEach(input => {
-            if (!input.value) input.name = "";
+            {% for f_name, filter in l_filter_fields.bool.items %}
+                <details>
+                    <summary>{{ filter.label }}</summary>
+                    <label>
+                        Yes
+                        <input type="radio" name="{{ f_name }}" value="True"
+                        {% if filter.user_input is True %}checked{% endif %}>
+                    </label>
+                    <label>
+                        No
+                        <input type="radio" name="{{ f_name }}" value="False"
+                        {% if filter.user_input is False %}checked{% endif %}>
+                    </label>
+                </details>
+            {% endfor %}
+
+            {% for f_name, filter in p_filter_fields.int.items %}
+                <details>
+                    <summary>{{ filter.label }}</summary>
+                    <label>
+                        min
+                        <input type="number" name="{{ f_name }}_min"
+                        value="{{ filter.user_min }}">
+                    </label>
+                    <label>
+                        max
+                        <input type="number" name="{{ f_name }}_max"
+                        value="{{ filter.user_max }}">
+                    </label>
+                </details>
+            {% endfor %}
+
+            {% for f_name, filter in p_filter_fields.float.items %}
+                <details>
+                    <summary>{{ filter.label }}</summary>
+                    <label>
+                        min
+                        <input type="number" name="{{ f_name }}_min"
+                        value="{{ filter.user_min }}" step=".01">
+                    </label>
+                    <label>
+                        max
+                        <input type="number" name="{{ f_name }}_max"
+                        value="{{ filter.user_max }}" step=".01">
+                    </label>
+                </details>
+            {% endfor %}
+
+            {% for f_name, filter in p_filter_fields.str.items %}
+                <details>
+                    <summary>{{ filter.label }}</summary>
+                    <ul class="filter-options">
+                        {% for option in filter.options %}
+                            <li class="filter-option">
+                                <input type="checkbox" name="{{ f_name }}"
+                                value="{{ option }}"
+                                {% if option in filter.user_inputs %}checked{% endif %}>
+                                {{ option }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </details>
+            {% endfor %}
+
+            {% for f_name, filter in p_filter_fields.bool.items %}
+                <details>
+                    <summary>{{ filter.label }}</summary>
+                    <label>
+                        Yes
+                        <input type="radio" name="{{ f_name }}" value="True"
+                        {% if filter.user_input is True %}checked{% endif %}>
+                    </label>
+                    <label>
+                        No
+                        <input type="radio" name="{{ f_name }}" value="False"
+                        {% if filter.user_input is False %}checked{% endif %}>
+                    </label>
+                </details>
+            {% endfor %}
+        </div>
+    </form>
+
+    <!-- This script removes unfilled filter fields from the URL before sending the
+    values to the view. -->
+    <script>
+        document.getElementById("filter_form").addEventListener("submit", function (e) {
+            this.querySelectorAll("input, select").forEach(input => {
+                if (!input.value) input.name = "";
+            });
         });
-    });
-</script>
+    </script>
 
-<div class="Results">
-    <h2>Results</h2>
-    <ul>
-        {% for listing in listings %}
-            <li class="result-card">
-                <a href="{% url 'listings:load_listing_detail' l_id=listing.id %}">
-                    <p>Title: {{ listing.title }}</p>
-                    <p>Product: {{ listing.product.product_name }}</p>
-                </a>
-            </li>
-        {% endfor %}
-    </ul>
+    <div class="Results">
+        <h2>Results</h2>
+        <ul>
+            {% for listing in listings %}
+                <li class="result-card">
+                    <a href="{% url 'listings:load_listing_detail' l_id=listing.id %}">
+                        <h3>Title: {{ listing.title }}</h3>
+                        <p>Product: {{ listing.product.product_name }}</p>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 </div>
 {% endblock %}

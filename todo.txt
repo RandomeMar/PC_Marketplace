@@ -7,7 +7,7 @@ SELENIUM:
 - Do stuff with selenium since that is a requirement for the project.
 
 FRONT END:
-- Fix broken features in templates. Certain features like the fields not showing
+x Fix broken features in templates. Certain features like the fields not showing
     up in "search_listings.html" need to be fixed.
 
 - Update the header section in "base.html" to better match "homepage.html".
@@ -24,7 +24,7 @@ x Add some way for customers and sellers to agree on a price, meetup location,
     "Transaction" model which is tied to a seller, customer, and listing. - Edgar
 
 LISTINGS:
-- Implement Transaction. Mauricio
+x Implement Purchase. Mauricio
 
 x Implement "my listings". Mauricio
 
